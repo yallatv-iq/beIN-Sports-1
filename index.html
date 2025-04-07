@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YALLA TV Video Player</title>
+    <meta name="robots" content="noindex">
+    <script src="https://content.jwplatform.com/libraries/IDzF9Zmk.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { margin: 0; background: #111; color: #fff; font-family: Arial, sans-serif; }
+        .container { padding: 20px; max-width: 900px; margin: auto; }
+        #jwplayer-container { width: 100%; height: 480px; margin-bottom: 20px; }
+        .viewer-count { font-size: 18px; margin-bottom: 10px; }
+        .comments { background: #222; padding: 10px; border-radius: 5px; max-height: 250px; overflow-y: auto; margin-bottom: 10px; }
+        .comment { background: #333; padding: 8px; border-radius: 4px; margin-bottom: 6px; }
+        .comment-input { display: flex; gap: 10px; }
+        .comment-input input { flex: 1; padding: 10px; border: none; border-radius: 5px; }
+        .comment-input button { padding: 10px 15px; border: none; border-radius: 5px; background: #a90202; color: white; cursor: pointer; }
+        .comment-input button:hover { background: #cc0404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="jwplayer-container"></div>
+        <div class="viewer-count" id="viewerCount">Viewers: 0</div>
+
+        <div class="comments" id="commentsSection">
+            <!-- تعليقات تظهر هنا -->
+        </div>
+
+        <div class="comment-input">
+            <input type="text" id="commentInput" placeholder="اكتب تعليقك...">
+            <button id="commentButton">نشر</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // إعداد المشغل
+        jwplayer("jwplayer-container").setup({
+            file: "https://ssc-1-enc.edgenextcdn.net/out/v1/c696e4819b55414388a1a487e8a45ca1/index.mpd",
+            width: "100%",
+            height: "100%",
+            autostart: true,
+            drm: {
+                clearkey: {
+                    keyId: "d84c325f36814f39bbe59080272b10c3",
+                    key: "550727de4c96ef1ecff874905493580f"
+                }
+            }
+        });
+
+        // عداد المشاهدين وهمي
+        let viewers = Math.floor(Math.random() * 100) + 1;
+        document.getElementById("viewerCount").innerText = "Viewers: " + viewers;
+
+        // جلب التعليقات
+        function fetchComments() {
+            $.get('fetch_comments.php', function(data) {
+                let comments = JSON.parse(data);
+                $('#commentsSection').empty();
+                comments.forEach(c => {
+                    $('#commentsSection').append(`<div class="comment">${c.comment_text}</div>`);
+                });
+            });
+        }
+        fetchComments();
+        setInterval(fetchComments, 5000); // تحديث كل 5 ثوانٍ
+
+        // إرسال تعليق
+        $('#commentButton').on('click', function() {
+            const text = $('#commentInput').val();
+            if (text.trim() !== '') {
+                $.post('save_comment.php', { comment: text }, function(res) {
+                    $('#commentInput').val('');
+                    fetchComments();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
