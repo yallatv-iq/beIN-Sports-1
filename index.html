@@ -2,80 +2,89 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>YALLA TV Video Player</title>
+    <title>Video Player YALLA TV</title>
     <meta name="robots" content="noindex">
+    <link href="https://cdn.jsdelivr.net/npm/clappr@latest/src/components/core/public/fonts.min.css" rel="stylesheet">
     <script src="https://content.jwplatform.com/libraries/IDzF9Zmk.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { margin: 0; background: #111; color: #fff; font-family: Arial, sans-serif; }
-        .container { padding: 20px; max-width: 900px; margin: auto; }
-        #jwplayer-container { width: 100%; height: 480px; margin-bottom: 20px; }
-        .viewer-count { font-size: 18px; margin-bottom: 10px; }
-        .comments { background: #222; padding: 10px; border-radius: 5px; max-height: 250px; overflow-y: auto; margin-bottom: 10px; }
-        .comment { background: #333; padding: 8px; border-radius: 4px; margin-bottom: 6px; }
-        .comment-input { display: flex; gap: 10px; }
-        .comment-input input { flex: 1; padding: 10px; border: none; border-radius: 5px; }
-        .comment-input button { padding: 10px 15px; border: none; border-radius: 5px; background: #a90202; color: white; cursor: pointer; }
-        .comment-input button:hover { background: #cc0404; }
+        /* CSS styles */
+        *, ::before, ::after { box-sizing: border-box }
+        html, body { height: 100%; margin: 0; padding: 0; background: #fff }
+        .container-fluid { display: flex; flex-direction: column; height: 100%; padding: 0; margin: 0 }
+        .buttons-section { padding: 1px; margin-bottom: 0; display: flex; flex-wrap: wrap; justify-content: center; overflow-x: auto; white-space: nowrap }
+        .buttons-section .btn { flex: 1 0 auto; padding: 10px; margin: 1px; white-space: normal; text-align: center; cursor: pointer; transition: background-color 0.3s, color .3s; font-size: .8rem; line-height: 1.7; border-radius: 5px; background-color: #221f1f; color: #fff; border: 1px solid #fff; font-weight: 600 }
+        .buttons-section .btn.selected { background-color: #a90202; color: #fff; border: none; font-size: .9rem; font-weight: 700 }
+        .buttons-section .btn:hover { background-color: #a90202 }
+        .player-container { position: relative; flex: 1; background-color: #000 }
+        #player { width: 100%; height: 100% }
+        .overlay-text { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); color: #fff; background-color: rgba(0, 0, 0, 0.6); padding: 10px 20px; border-radius: 5px; font-size: 1.5rem; z-index: 2; text-align: center; white-space: nowrap; text-decoration: none }
+        @media (max-width: 576px) { .overlay-text { font-size: 1rem; padding: 8px 16px } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="jwplayer-container"></div>
-        <div class="viewer-count" id="viewerCount">Viewers: 0</div>
-
-        <div class="comments" id="commentsSection">
-            <!-- تعليقات تظهر هنا -->
+    <div class="container-fluid">
+        <div class="buttons-section">
+            <button class="btn video-btn selected" data-video-type="direct_with_key" data-video-id="AD PREMIUM 1" data-url="https://sps1.starzplayarabia.com/out/v1/41ff8fde1cd84ed5b30ab8198755356b/index.mpd" data-video-key="b253c726c24c7c94a3ddf9b1907e2c76:097963d6ad73c3d712a104981de0ed42">AD PREMIUM 1</button>
+            <!-- Add more buttons as needed -->
         </div>
 
-        <div class="comment-input">
-            <input type="text" id="commentInput" placeholder="اكتب تعليقك...">
-            <button id="commentButton">نشر</button>
+        <!-- AdSense Ad Unit -->
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7589173739720637"
+                crossorigin="anonymous"></script>
+        <!-- BeIN sport 1 -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-7589173739720637"
+             data-ad-slot="8318419236"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+
+        <div class="player-container">
+            <div id="videoPlayer">
+                <div id="jwplayer-container"></div>
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // إعداد المشغل
-        jwplayer("jwplayer-container").setup({
-            file: "https://ssc-1-enc.edgenextcdn.net/out/v1/c696e4819b55414388a1a487e8a45ca1/index.mpd",
-            width: "100%",
-            height: "100%",
-            autostart: true,
-            drm: {
-                clearkey: {
-                    keyId: "d84c325f36814f39bbe59080272b10c3",
-                    key: "550727de4c96ef1ecff874905493580f"
-                }
-            }
-        });
-
-        // عداد المشاهدين وهمي
-        let viewers = Math.floor(Math.random() * 100) + 1;
-        document.getElementById("viewerCount").innerText = "Viewers: " + viewers;
-
-        // جلب التعليقات
-        function fetchComments() {
-            $.get('fetch_comments.php', function(data) {
-                let comments = JSON.parse(data);
-                $('#commentsSection').empty();
-                comments.forEach(c => {
-                    $('#commentsSection').append(`<div class="comment">${c.comment_text}</div>`);
+        // JavaScript for video player setup
+        $(document).ready(function() {
+            function initializePlayer(videoUrl, videoKey) {
+                jwplayer("jwplayer-container").setup({
+                    file: videoUrl,
+                    width: "100%",
+                    height: "100%",
+                    aspectratio: "16:9",
+                    controls: true,
+                    autostart: true,
+                    drm: {
+                        clearkey: {
+                            keyId: videoKey.split(":")[0],
+                            key: videoKey.split(":")[1]
+                        }
+                    },
+                    stretching: "exactfit",
+                    fullscreen: true
                 });
+            }
+
+            const videoUrl = $(".video-btn.selected").data("url");
+            const videoKey = $(".video-btn.selected").data("video-key");
+            initializePlayer(videoUrl, videoKey);
+
+            $(".video-btn").on("click", function() {
+                $(".video-btn").removeClass("selected");
+                $(this).addClass("selected");
+                const videoUrl = $(this).data("url");
+                const videoKey = $(this).data("video-key");
+                initializePlayer(videoUrl, videoKey);
             });
-        }
-        fetchComments();
-        setInterval(fetchComments, 5000); // تحديث كل 5 ثوانٍ
-
-        // إرسال تعليق
-        $('#commentButton').on('click', function() {
-            const text = $('#commentInput').val();
-            if (text.trim() !== '') {
-                $.post('save_comment.php', { comment: text }, function(res) {
-                    $('#commentInput').val('');
-                    fetchComments();
-                });
-            }
         });
     </script>
 </body>
