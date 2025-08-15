@@ -1,101 +1,226 @@
-<!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>Video Player YALLA TV</title>
-  <meta name="robots" content="noindex">
-  <link href="https://cdn.jsdelivr.net/npm/clappr@latest/src/components/core/public/fonts.min.css" rel="stylesheet">
-  <script src="https://content.jwplatform.com/libraries/IDzF9Zmk.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    /* تنسيقات أساسية */
-    *, ::before, ::after {
-      box-sizing: border-box;
-    }
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background: #fff;
-    }
-    .container-fluid {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-    /* يتمحور مشغل الفيديو في وسط الشاشة */
-    .player-container {
-      flex: 1;
-      background-color: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    /* تحديد أبعاد المشغل مع حد أقصى */
-    #jwplayer-container {
-      width: 100%;
-      height: 100%;
-      max-width: 1280px;
-      max-height: 720px;
-    }
-    /* تصميم مؤشر التحميل */
-    #loader {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      background-color: rgba(0,0,0,0.7);
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 1.2rem;
-      z-index: 3;
-    }
-  </style>
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="no-referrer" />
+<style>
+  
+body {
+  margin: 0;
+  padding: 0;
+  background-color: black;
+}
+
+#player {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* خلفية حاوية عناصر التحكم */
+.jwplayer .jw-controlbar {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* لون الأزرار */
+.jwplayer .jw-icon {
+  color: #eee !important;
+}
+
+.jwplayer .jw-button-color:hover {
+  color: #e50914 !important;
+}
+
+/* لون شريط التقدم */
+.jwplayer .jw-progress {
+  background-color: red !important;
+}
+
+.jwplayer .jw-progress .jw-buffer {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.jwplayer .jw-progress .jw-play-progress {
+  background-color: #r !important;
+}
+
+/* شكل النقطة في الشريط */
+.jwplayer .jw-slider-time .jw-knob {
+  background-color: red !important;
+  border: 2px solid red;
+}
+
+/* شكل زر التشغيل الكبير في المنتصف */
+.jwplayer .jw-display-icon-container {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+}
+
+.jwplayer .jw-media video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+/* العلامة المائية النصية */
+.storm-text-watermark {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 100;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.storm-text-watermark:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.7);
+}
+</style>
+
+<script src="//ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
+<script>
+jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
+</script>
 </head>
 <body>
-  <div class="container-fluid">
-    <div class="player-container">
-      <!-- مؤشر التحميل سيظهر حتى يصبح الفيديو جاهزًا -->
-      <div id="loader">جاري التحميل...</div>
-      <div id="jwplayer-container"></div>
-    </div>
-  </div>
-  <!-- تحميل مكتبات الجافاسكريبت -->
-  <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-    $(document).ready(function() {
-      function initializePlayer(videoUrl, videoKey) {
-        var playerInstance = jwplayer("jwplayer-container").setup({
-          file: videoUrl,
-          width: "100%",
-          height: "100%",
-          aspectratio: "16:9",
-          controls: true,
-          autostart: true,
+
+<script>
+function getParameterByName(name) {
+  name = name.replace(/[]/, "\").replace(/[]/, "\");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+  results = regex.exec(location.search);
+  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+var get = getParameterByName('get');
+var key = getParameterByName('key');
+var key2 = getParameterByName('key2');
+var getIMG = getParameterByName('img');
+</script>
+
+<div id="player"></div>
+
+<!-- العلامة المائية النصية العلوية فقط -->
+<div class="storm-text-watermark">Yalla TV</div>
+
+<script>
+  let currentFit = localStorage.getItem("videoFit") || "fill"; // استرجاع أو افتراضي
+
+  function applyVideoFit() {
+    const video = document.querySelector(".jwplayer video");
+    if (video) {
+      video.style.objectFit = currentFit;
+    }
+  }
+
+  function toggleAspectRatio() {
+    currentFit = currentFit === "fill" ? "contain" : "fill";
+    localStorage.setItem("videoFit", currentFit); // حفظ الوضع الجديد
+    applyVideoFit();
+  }
+
+  function addAspectButton(playerInstance) {
+    playerInstance.addButton(
+      "https://img.icons8.com/ios-glyphs/24/ffffff/resize.png",
+      "تبديل الأبعاد",
+      toggleAspectRatio,
+      "aspect-toggle"
+    );
+  }
+
+  function forceFitLoop() {
+    // تأكيد ضبط object-fit كل ثانية
+    setInterval(applyVideoFit, 1000);
+  }
+
+  function observeVideoChanges() {
+    const observer = new MutationObserver(() => {
+      applyVideoFit(); // أي تغيّر في DOM
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  function setupFullscreenFix() {
+    const events = [
+      "fullscreenchange",
+      "webkitfullscreenchange",
+      "mozfullscreenchange",
+      "msfullscreenchange"
+    ];
+
+    events.forEach(event => {
+      document.addEventListener(event, () => {
+        setTimeout(() => {
+          applyVideoFit(); // بعد الدخول أو الخروج من fullscreen
+        }, 200);
+      });
+    });
+  }
+
+  function setupPlayer() {
+    const safeOffset = 6 * 60 * 60 * 1000;
+    const duration = 12 * 60 * 60 * 1000;
+
+    const startTimestamp = Date.now() - safeOffset;
+    const endTimestamp = startTimestamp + duration;
+
+    const baseURL = "https://todtv-live-spo-prod.akamaized.net/Content/Channel/svc-spo-hd-08-dt/DASH/hdntl=exp=1755297293~acl=*%2fContent%2fChannel%2fsvc-spo-hd-08-dt%2fDASH%2f*~id=153916ea-9ba7-4b04-8c2c-9c246fb5198e~data=hdntl,aXA9MTU2LjE5OC4yMTYuMTU1~hmac=ad22e68a2c667ed0bf4af92ccdf988edef7e433ec58228ea64ab601adb302424/playlist_ha.mpd?start=1755282000000&end=1755294000000";
+    const fullURL = `${baseURL}?start=${startTimestamp}&end=${endTimestamp}`;
+
+    const playerInstance = jwplayer("player");
+
+    playerInstance.setup({
+      playlist: [{
+        sources: [{
+          default: false,
+          type: "dash",
+          file: fullURL,
           drm: {
             clearkey: {
-              keyId: videoKey.split(":")[0],
-              key: videoKey.split(":")[1]
+                  "keyId": "f1dac2f937c9338f8e7c33963d06c489", 
+          "key": "8ab19f639fe1552c7463f4b978c41c9d" 
             }
           },
-          stretching: "exactfit",
-          fullscreen: true
-        });
-        // عند جاهزية المشغل يتم إخفاء مؤشر التحميل
-        playerInstance.on('ready', function() {
-          $("#loader").fadeOut();
-        });
-      }
-      // استخدام الرابط والمفتاح المحددين
-      const videoUrl = "https://ssc-1-enc.edgenextcdn.net/out/v1/c696e4819b55414388a1a487e8a45ca1/index.mpd";
-      const videoKey = "d84c325f36814f39bbe59080272b10c3:550727de4c96ef1ecff874905493580f";
-      initializePlayer(videoUrl, videoKey);
+          label: "0"
+        }]
+      }],
+      width: "100%",
+      height: "100%",
+      autostart: false,
+      controls: true,
+      cast: {},
+      sharing: false
     });
-  </script>
+
+    playerInstance.on('ready', function () {
+      applyVideoFit();
+      addAspectButton(playerInstance);
+    });
+
+    playerInstance.on('play', applyVideoFit);
+    playerInstance.on('fullscreen', applyVideoFit);
+  }
+
+  // تشغيل كل شيء
+  setupPlayer();
+  setInterval(setupPlayer, 50 * 60 * 1000); // إعادة التشغيل كل 50 دقيقة
+  observeVideoChanges();  // راقب تغيّرات DOM
+  setupFullscreenFix();   // دعم fullscreen
+  forceFitLoop();         // فرض مستمر كل ثانية
+</script>
+
 </body>
 </html>
