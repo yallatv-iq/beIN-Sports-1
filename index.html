@@ -177,7 +177,7 @@ var getIMG = getParameterByName('img');
     const startTimestamp = Date.now() - safeOffset;
     const endTimestamp = startTimestamp + duration;
 
-    const baseURL = "https://ak-live-play-dash.jacocdn.com/sport/320861208955600689_c1_720P/main.mpd?biz=0&cip=194.49.87.111&key=1755956429-5a2b2bec7a3b288c461b07f0fe90e88f&oid=1&play_proto=dash&src=1&uid=3021691103&vdr=0&sign=b148f2bcbf9790f925582cea0af57453";
+    const baseURL = "https://todtv-live-spo-prod.akamaized.net/Content/Channel/svc-spo-hd-08-dt/DASH/hdntl=exp=1755731952~acl=*%2fContent%2fChannel%2fsvc-spo-hd-08-dt%2fDASH%2f*~id=6ec21a39-8d55-4da3-9f98-f11c00440374~data=hdntl,aXA9MmEwMjo0NzgwOjY6MTg4NjowOjM3MmI6N2IzZDox~hmac=745e08e3be28e425a3706c75ea5a2fb293756add73c7829c4b79f9e25edda21a/playlist_ha.mpd";
     const fullURL = `${baseURL}?start=${startTimestamp}&end=${endTimestamp}`;
 
     const playerInstance = jwplayer("player");
@@ -190,8 +190,8 @@ var getIMG = getParameterByName('img');
           file: fullURL,
           drm: {
             clearkey: {
-                  "keyId": "fc381a849cf14a979d2fa315f5fc4735", 
-          "key": "bed920d1e37f4f1d878aedd8cf116268" 
+                  "keyId": "f1dac2f937c9338f8e7c33963d06c489", 
+          "key": "8ab19f639fe1552c7463f4b978c41c9d" 
             }
           },
           label: "0"
