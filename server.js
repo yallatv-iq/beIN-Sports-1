@@ -1,32 +1,46 @@
 const express = require("express");
+const https = require("https");
+const http = require("http");
 const app = express();
 
-// إخبار السيرفر بعرض ملفات واجهة الويب (المشغل) من مجلد public
+// عرض واجهة المشغل
 app.use(express.static("public"));
 
-// مسار تخطي الحماية
-app.get("/api/proxy", async (req, res) => {
-  const id = req.query.id;
-  if (!id) return res.status(400).json({ error: "Missing channel ID" });
+// مسار تشغيل البث المباشر متخفياً
+app.get("/api/stream", (req, res) => {
+    // الرابط المجرد الذي قمت باصطياده
+    const targetUrl = req.query.url;
 
-  const targetUrl = `http://a2.apk-api.com/api/channel/${id}`;
+    if (!targetUrl) {
+        return res.status(400).send("رابط البث مفقود");
+    }
 
-  try {
-    const response = await fetch(targetUrl, {
-      method: "GET",
-      headers: {
-        // بصمة الأندرويد السحرية لتخطي حظر السيرفر
-        "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 11; SM-G998B Build/RP1A.200720.012)",
-        "Accept": "application/json, text/plain, */*"
-      }
+    // تجهيز البصمة والمصدر (Referer) التي يطلبها السيرفر الأصلي
+    const options = {
+        headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+            "Referer": "https://x.com/",
+            "Origin": "https://x.com/",
+            "Accept": "*/*"
+        }
+    };
+
+    // السماح للمشغل الخاص بك بقراءة البث
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    
+    // جلب البث وتمريره مباشرة إلى المشغل (Stream Piping)
+    const client = targetUrl.startsWith("https") ? https : http;
+    
+    const proxyRequest = client.get(targetUrl, options, (proxyResponse) => {
+        res.writeHead(proxyResponse.statusCode, proxyResponse.headers);
+        proxyResponse.pipe(res);
     });
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: "فشل الاتصال بسيرفر التطبيق" });
-  }
+
+    proxyRequest.on("error", (err) => {
+        console.error("خطأ في الاتصال:", err);
+        res.status(500).send("تعذر جلب البث من السيرفر الأصلي.");
+    });
 });
 
-// تشغيل السيرفر
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log("Server running on port " + port));
+app.listen(port, () => console.log("السيرفر يعمل وجاهز لتمرير البث..."));
