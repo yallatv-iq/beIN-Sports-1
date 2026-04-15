@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XLION LUXURY PLAYER</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <link href="https://unpkg.com/@videojs/themes@1.0.1/dist/city/index.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #05070a;
+            --accent: #00d2ff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --gradient: linear-gradient(45deg, #00d2ff, #3a7bd5);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* القائمة الجانبية الفاخرة */
+        .sidebar {
+            width: 350px;
+            background: rgba(10, 12, 18, 0.8);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            transition: 0.5s;
+        }
+
+        .sidebar-header {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .search-container {
+            padding: 0 20px 20px;
+        }
+
+        .search-container input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 10px;
+            color: white;
+            outline: none;
+            font-family: 'Cairo';
+        }
+
+        .channel-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 15px 20px;
+        }
+
+        .channel-item {
+            padding: 15px;
+            background: var(--glass);
+            margin-bottom: 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            border: 1px solid transparent;
+        }
+
+        .channel-item i {
+            margin-left: 15px;
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .channel-item:hover {
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--accent);
+            transform: translateX(-5px);
+        }
+
+        .channel-item.active {
+            background: var(--gradient);
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
+        }
+
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: radial-gradient(circle at top left, #10141d, #05070a);
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 1100px;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .video-js { width: 100% !important; height: 580px !important; }
+
+        .channel-info {
+            width: 100%;
+            max-width: 1100px;
+            margin-top: 30px;
+            text-align: right;
+        }
+
+        .channel-info h1 {
+            font-size: 32px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .live-badge {
+            background: #ff4b2b;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 5px;
+            margin-right: 15px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* تخصيص الـ scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">Xlion Premium</div>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="ابحث عن قناة..." onkeyup="filterChannels()">
+        </div>
+
+        <div id="loader" style="text-align: center; color: var(--accent); padding: 20px;">
+            <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+        </div>
+        
+        <div class="channel-list" id="channelList"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="video-container">
+            <video id="my-player" class="video-js vjs-theme-city" controls preload="auto">
+                <p class="vjs-no-js">يرجى تفعيل الجافا سكريبت</p>
+            </video>
+        </div>
+
+        <div class="channel-info">
+            <h1 id="currentChannelName">
+                <span id="chNameText">اختر قناة للبدء</span>
+                <span class="live-badge" id="liveBadge" style="display: none;">LIVE</span>
+            </h1>
+            <p style="color: rgba(255,255,255,0.5);">البث المباشر بجودة 4K | سيرفرات إكس ليون</p>
+        </div>
+    </div>
+
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+
+    <script>
+        const player = videojs('my-player');
+        let allChannels = [];
+        const apiURL = "http://xlion.net:8080/player_api.php?username=hamdiusa2022&password=simosaid01&action=get_live_streams";
+
+        async function fetchChannels() {
+            try {
+                const response = await fetch(apiURL);
+                allChannels = await response.json();
+                renderChannels(allChannels);
+                document.getElementById('loader').style.display = 'none';
+            } catch (error) {
+                document.getElementById('loader').innerHTML = "فشل الاتصال - تأكد من الـ CORS";
+            }
+        }
+
+        function renderChannels(channels) {
+            const listContainer = document.getElementById('channelList');
+            listContainer.innerHTML = '';
+            channels.forEach(ch => {
+                const div = document.createElement('div');
+                div.className = 'channel-item';
+                div.innerHTML = `<i class="fas fa-play-circle"></i> <span>${ch.name}</span>`;
+                div.onclick = () => {
+                    document.querySelectorAll('.channel-item').forEach(i => i.classList.remove('active'));
+                    div.classList.add('active');
+                    playStream(ch.stream_id, ch.name, ch.container_extension);
+                };
+                listContainer.appendChild(div);
+            });
+        }
+
+        function playStream(id, name, ext) {
+            document.getElementById('chNameText').innerText = name;
+            document.getElementById('liveBadge').style.display = 'inline-block';
+            
+            const streamUrl = `http://xlion.net:8080/live/hamdiusa2022/simosaid01/${id}.${ext || 'm3u8'}`;
+            
+            player.src({ src: streamUrl, type: 'application/x-mpegURL' });
+            player.play();
+        }
+
+        function filterChannels() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allChannels.filter(c => c.name.toLowerCase().includes(query));
+            renderChannels(filtered);
+        }
+
+        fetchChannels();
+    </script>
+</body>
+</html>
