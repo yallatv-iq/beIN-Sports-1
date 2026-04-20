@@ -108,7 +108,7 @@
                 <span class="badge">الموسم 1</span>
                 <span style="color: #ccc;">مغامرة • دراما</span>
             </div>
-            <button class="play-btn" onclick="playEpisode(1, 'http://supaapp.xyz:8080/series/2551810583569940/2025565766597215/457188.mp4')">تشغيل الحلقة 1</button>
+            <button class="play-btn" onclick="playEpisode(1, 'https://vid4.zvde-dsn-05.site/Al-Gabal-Al-Thalji/01.mp4')">تشغيل الحلقة 1</button>
         </div>
     </header>
 
@@ -151,15 +151,15 @@
     <section class="episodes-section">
         <h2 class="section-title">الحلقات المتوفرة</h2>
         <div class="episodes-grid">
-            <div class="episode-card active" onclick="playEpisode(1, 'http://supaapp.xyz:8080/series/2551810583569940/2025565766597215/457188.mp4')">
+            <div class="episode-card active" onclick="playEpisode(1, 'https://vid4.zvde-dsn-05.site/Al-Gabal-Al-Thalji/01.mp4')">
                 <div class="episode-thumb"></div>
                 <div class="episode-info"><div class="episode-title">الحلقة 1</div><div class="episode-status">متوفرة</div></div>
             </div>
-            <div class="episode-card" onclick="playEpisode(2, 'http://supaapp.xyz:8080/series/2551810583569940/2025565766597215/457188.mp4')">
+            <div class="episode-card" onclick="playEpisode(2, 'https://vid4.zvde-dsn-05.site/Al-Gabal-Al-Thalji/01.mp4')">
                 <div class="episode-thumb"></div>
                 <div class="episode-info"><div class="episode-title">الحلقة 2</div><div class="episode-status">متوفرة</div></div>
             </div>
-            <div class="episode-card" onclick="playEpisode(3, 'http://supaapp.xyz:8080/series/2551810583569940/2025565766597215/457188.mp4')">
+            <div class="episode-card" onclick="playEpisode(3, 'https://vid4.zvde-dsn-05.site/Al-Gabal-Al-Thalji/01.mp4')">
                 <div class="episode-thumb"></div>
                 <div class="episode-info"><div class="episode-title">الحلقة 3</div><div class="episode-status">متوفرة</div></div>
             </div>
@@ -178,12 +178,8 @@
         const pauseIcon = document.getElementById('pauseIcon');
         let hideTimer;
 
-        // وظيفة النقر على الشاشة الفارغة
         function handleVideoClick(e) {
-            // إذا نقرنا على زر أو شريط التقدم، لا نفعل شيئاً هنا
             if (e.target.closest('button') || e.target.closest('input')) return;
-
-            // تبديل الظهور والاختفاء
             if (overlay.classList.contains('hide')) {
                 showControls();
             } else {
@@ -195,7 +191,6 @@
         function showControls() {
             overlay.classList.remove('hide');
             clearTimeout(hideTimer);
-            // اختفاء تلقائي بعد 4 ثواني إذا كان الفيديو يعمل
             if (!video.paused) {
                 hideTimer = setTimeout(() => overlay.classList.add('hide'), 4000);
             }
@@ -208,7 +203,6 @@
             video.play();
             showControls();
             
-            // تحديث البطاقة النشطة
             document.querySelectorAll('.episode-card').forEach((c, i) => {
                 c.classList.toggle('active', i === num-1);
             });
@@ -247,7 +241,7 @@
         video.addEventListener('pause', () => {
             playIcon.style.display = 'block';
             pauseIcon.style.display = 'none';
-            overlay.classList.remove('hide'); // إظهار الأزرار دائماً عند الإيقاف
+            overlay.classList.remove('hide');
         });
 
         video.addEventListener('timeupdate', () => {
