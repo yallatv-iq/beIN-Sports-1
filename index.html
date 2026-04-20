@@ -2,9 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الجبل الثلجي - المشغل الاحترافي</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الجبل الثلجي - المشغل السريع</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #050505;
@@ -14,7 +14,7 @@
             --card-bg: #121212;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background-color: var(--bg-color); color: var(--text-light); overflow-x: hidden; }
 
         /* الهيدر والبوستر */
@@ -27,10 +27,12 @@
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(to top, var(--bg-color) 0%, rgba(5,5,5,0.7) 40%, rgba(5,5,5,0.2) 100%);
         }
-        .hero-content { position: relative; z-index: 10; max-width: 600px; padding-bottom: 2rem; }
+        .hero-content { position: relative; z-index: 10; max-width: 600px; padding-bottom: 2rem; pointer-events: none; }
+        .hero-content button { pointer-events: auto; }
         .title { font-size: 3.5rem; font-weight: 800; margin-bottom: 10px; text-shadow: 2px 2px 10px #000; }
         .badge { background: rgba(229, 9, 20, 0.2); color: var(--primary-color); padding: 4px 12px; border-radius: 4px; border: 1px solid var(--primary-color); font-weight: bold; margin-left: 10px; }
-        .play-btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 35px; font-size: 1.1rem; font-weight: 800; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .play-btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 35px; font-size: 1.1rem; font-weight: 800; border-radius: 6px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3); }
+        .play-btn:active { transform: scale(0.95); }
 
         /* حاوية المشغل */
         .player-wrapper {
@@ -40,63 +42,85 @@
             display: none; overflow: hidden;
         }
 
-        .video-container { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; cursor: pointer; }
+        .video-container { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+
+        /* طبقة اللمس الذكي */
+        .tap-overlay { position: absolute; inset: 0; z-index: 15; display: flex; direction: ltr; }
+        .tap-zone { height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .tap-zone.left { width: 30%; } .tap-zone.center { width: 40%; } .tap-zone.right { width: 30%; }
+        
+        .seek-indicator { 
+            background: rgba(0,0,0,0.6); padding: 15px; border-radius: 50%; color: #fff; 
+            font-size: 13px; font-weight: bold; text-align: center; opacity: 0; 
+            transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; transform: scale(0.8);
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .seek-indicator svg { width: 24px; height: 24px; fill: currentColor; }
+        .seek-indicator.active { opacity: 1; transform: scale(1); }
 
         /* واجهة التحكم */
         .controls-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: space-between;
-            padding: 20px; transition: opacity 0.3s ease;
-            background: rgba(0,0,0,0.4);
-            z-index: 30;
+            position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; 
+            justify-content: space-between; padding: 20px; transition: opacity 0.3s ease;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.6) 100%);
+            pointer-events: none; 
         }
-        .controls-overlay.hide { opacity: 0; pointer-events: none; }
-
-        /* منع اختفاء الواجهة عند النقر على الأزرار نفسها */
+        .controls-overlay.hidden { opacity: 0; }
         .top-controls, .center-controls, .bottom-controls { pointer-events: auto; }
 
         .top-controls { display: flex; justify-content: space-between; align-items: center; }
         .player-series-name { font-size: 1.2rem; font-weight: 800; text-shadow: 1px 1px 3px #000; text-align: right;}
         
-        .icon-btn { background: none; border: none; color: white; cursor: pointer; transition: 0.3s; }
-        .icon-btn svg { width: 24px; height: 24px; fill: currentColor; }
+        .icon-btn { background: none; border: none; color: white; cursor: pointer; transition: 0.2s; opacity: 0.8; }
+        .icon-btn:active { transform: scale(0.8); opacity: 1; }
+        .icon-btn svg { width: 24px; height: 24px; fill: currentColor; filter: drop-shadow(1px 1px 2px #000); }
 
-        .center-controls { display: flex; justify-content: center; align-items: center; gap: 30px; }
-        .center-btn { background: none; border: none; color: white; cursor: pointer; transition: 0.2s; }
+        .center-controls { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 40px; direction: ltr; }
+        .center-btn { background: none; border: none; color: white; cursor: pointer; transition: 0.2s; opacity: 0.9; }
+        .center-btn:active { transform: scale(0.85); opacity: 1; }
         .play-pause-btn {
-            width: 65px; height: 65px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
+            width: 70px; height: 70px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
             display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.5);
         }
-        .play-pause-btn:hover { border-color: var(--primary-color); }
-        .play-pause-btn svg { width: 30px; height: 30px; fill: white; }
-        .skip-btn svg { width: 35px; height: 35px; fill: white; }
+        .play-pause-btn:hover { border-color: var(--primary-color); background: rgba(229, 9, 20, 0.2); }
+        .play-pause-btn svg { width: 35px; height: 35px; fill: white; }
+        .skip-btn svg { width: 35px; height: 35px; fill: white; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5)); }
 
-        .bottom-controls { display: flex; align-items: center; gap: 15px; direction: ltr; }
-        .time-text { font-size: 0.85rem; font-family: monospace; color: #fff; }
+        .bottom-controls { display: flex; align-items: center; gap: 15px; direction: ltr; width: 100%; margin-bottom: 5px;}
+        .time-text { font-size: 0.9rem; font-family: monospace; color: #fff; text-shadow: 1px 1px 2px #000; user-select: none; }
         
-        .progress-container { flex-grow: 1; display: flex; align-items: center; }
-        input[type="range"] {
-            -webkit-appearance: none; width: 100%; height: 5px; background: rgba(255,255,255,0.2);
-            border-radius: 3px; outline: none; cursor: pointer;
+        .c-p-track-wrapper { flex-grow: 1; height: 25px; display: flex; align-items: center; cursor: pointer; position: relative; touch-action: none; }
+        .c-p-track { width: 100%; height: 5px; background: rgba(255,255,255,0.2); border-radius: 3px; position: relative; transition: height 0.2s ease; }
+        .c-p-track-wrapper:active .c-p-track { height: 7px; } 
+        .c-p-fill { height: 100%; background: var(--primary-color); border-radius: 3px; width: 0%; position: absolute; left: 0; top: 0; pointer-events: none; }
+        .c-p-fill::after { 
+            content: ''; position: absolute; right: -7px; top: 50%; transform: translateY(-50%); 
+            width: 16px; height: 16px; background: var(--primary-color); border-radius: 50%; 
+            box-shadow: 0 0 8px rgba(0,0,0,0.8); pointer-events: none; transition: transform 0.2s ease; 
         }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 15px; height: 15px; background: var(--primary-color);
-            border-radius: 50%; cursor: pointer;
-        }
+        .c-p-track-wrapper:active .c-p-fill::after { transform: translateY(-50%) scale(1.3); }
 
         /* قائمة الحلقات */
         .episodes-section { padding: 2rem 5%; }
-        .section-title { font-size: 1.5rem; font-weight: 800; border-right: 5px solid var(--primary-color); padding-right: 15px; margin-bottom: 20px;}
+        .section-title { font-size: 1.6rem; font-weight: 800; border-right: 5px solid var(--primary-color); padding-right: 15px; margin-bottom: 20px;}
         .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .episode-card { background-color: var(--card-bg); border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.3s; border: 1px solid transparent; }
-        .episode-card:hover { transform: translateY(-5px); background-color: #1a1a1a; }
+        .episode-card { background-color: var(--card-bg); border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .episode-card:active { transform: scale(0.96); background-color: #1a1a1a; }
         .episode-thumb { height: 140px; background: url('https://i.top4top.io/p_3762hs9kv1.jpg') center/cover; filter: brightness(0.6); }
         .episode-card.active { border-color: var(--primary-color); }
         .episode-card.active .episode-thumb { filter: brightness(1); }
         .episode-info { padding: 12px; }
         .episode-title { font-size: 1.1rem; font-weight: 700; }
         .episode-status { font-size: 0.85rem; color: #4ade80; }
+
+        @media (max-width: 768px) {
+            .title { font-size: 2.5rem; }
+            .player-wrapper { width: 100%; margin-top: -20px; border-radius: 0; }
+            .center-controls { gap: 25px; }
+            .play-pause-btn { width: 60px; height: 60px; }
+            .skip-btn svg { width: 28px; height: 28px; }
+        }
     </style>
 </head>
 <body>
@@ -106,43 +130,46 @@
             <h1 class="title">الجبل الثلجي</h1>
             <div style="margin-bottom: 20px;">
                 <span class="badge">الموسم 1</span>
-                <span style="color: #ccc;">مغامرة • دراما</span>
+                <span style="color: #ccc; font-weight: 600;">مغامرة • دراما</span>
             </div>
-            <button class="play-btn" onclick="playEpisode(1, 'https://vid4.zvde-dsn-05.site/Al-Gabal-Al-Thalji/01.mp4')">تشغيل الحلقة 1</button>
+            <button class="play-btn" onclick="playEpisode(1, 'https://vid4.zvde-dsn-05.site/Al-Gabal-Al-Thalji/01.mp4')">شاهد الحلقة 1</button>
         </div>
     </header>
 
     <div class="player-wrapper" id="playerWrapper">
-        <div class="video-container" id="videoContainer" onclick="handleVideoClick(event)">
-            <video id="customVideo" playsinline></video>
+        <div class="video-container" id="videoContainer">
+            <video id="customVideo" playsinline preload="auto"></video>
             
-            <div class="controls-overlay" id="controlsOverlay">
+            <div class="tap-overlay">
+                <div class="tap-zone left" id="tap-left"><div class="seek-indicator" id="ind-left"><svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg><span>10 ث</span></div></div>
+                <div class="tap-zone center" id="tap-mid"></div>
+                <div class="tap-zone right" id="tap-right"><div class="seek-indicator" id="ind-right"><svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg><span>10 ث</span></div></div>
+            </div>
+
+            <div class="controls-overlay hidden" id="controlsOverlay">
                 <div class="top-controls">
-                    <div class="top-icons">
-                        <button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94s-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg></button>
-                    </div>
-                    <div class="player-title-area">
-                        <div class="player-series-name">الجبل الثلجي</div>
-                        <div id="playerEpTitle" class="player-ep-name" style="color: #ccc; font-size: 0.9rem;">الحلقة 1</div>
-                    </div>
+                    <button class="icon-btn" onclick="closePlayer()"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+                    <div class="player-series-name">الجبل الثلجي <span id="playerEpTitle" style="color: #ccc; font-size: 0.9rem; display:block;">الحلقة 1</span></div>
                 </div>
 
                 <div class="center-controls">
-                    <button class="center-btn skip-btn" onclick="skip(-10, event)"><svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg></button>
-                    <button class="center-btn play-pause-btn" id="playPauseBtn" onclick="togglePlay(event)">
+                    <button class="center-btn skip-btn" onclick="skip(-10)"><svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg></button>
+                    <button class="center-btn play-pause-btn" id="playPauseBtn" onclick="togglePlay()">
                         <svg id="pauseIcon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                         <svg id="playIcon" style="display:none;" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     </button>
-                    <button class="center-btn skip-btn" onclick="skip(10, event)"><svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg></button>
+                    <button class="center-btn skip-btn" onclick="skip(10)"><svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg></button>
                 </div>
 
                 <div class="bottom-controls">
                     <span class="time-text" id="currentTime">00:00</span>
-                    <div class="progress-container">
-                        <input type="range" id="progressBar" value="0" min="0" max="100" step="0.1" oninput="seek(event)">
+                    <div class="c-p-track-wrapper" id="progressWrapper">
+                        <div class="c-p-track">
+                            <div class="c-p-fill" id="progressFilled"></div>
+                        </div>
                     </div>
                     <span class="time-text" id="durationTime">00:00</span>
-                    <button class="icon-btn" onclick="toggleFull(event)"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>
+                    <button class="icon-btn" onclick="toggleFull()"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>
                 </div>
             </div>
         </div>
@@ -151,56 +178,74 @@
     <section class="episodes-section">
         <h2 class="section-title">الحلقات المتوفرة</h2>
         <div class="episodes-grid">
+            
             <div class="episode-card active" onclick="playEpisode(1, 'https://vid4.zvde-dsn-05.site/Al-Gabal-Al-Thalji/01.mp4')">
                 <div class="episode-thumb"></div>
-                <div class="episode-info"><div class="episode-title">الحلقة 1</div><div class="episode-status">متوفرة</div></div>
+                <div class="episode-info"><div class="episode-title">الحلقة 1</div><div class="episode-status">متوفرة الآن</div></div>
             </div>
             <div class="episode-card" onclick="playEpisode(2, 'https://vid1.zvde-dsn-05.site/Al-Gabal-Al-Thalji/02.mp4')">
                 <div class="episode-thumb"></div>
-                <div class="episode-info"><div class="episode-title">الحلقة 2</div><div class="episode-status">متوفرة</div></div>
+                <div class="episode-info"><div class="episode-title">الحلقة 2</div><div class="episode-status">متوفرة الآن</div></div>
             </div>
             <div class="episode-card" onclick="playEpisode(3, 'https://vid5.zvde-dsn-05.site/Al-Gabal-Al-Thalji/03.mp4')">
                 <div class="episode-thumb"></div>
-                <div class="episode-info"><div class="episode-title">الحلقة 3</div><div class="episode-status">متوفرة</div></div>
+                <div class="episode-info"><div class="episode-title">الحلقة 3</div><div class="episode-status">متوفرة الآن</div></div>
+            </div>
+
+            <div class="episode-card" style="opacity: 0.5; cursor: default;">
+                <div class="episode-thumb" style="filter: grayscale(1);"></div>
+                <div class="episode-info"><div class="episode-title">الحلقة 4</div><div style="color: #888; font-size: 0.85rem;">قريباً</div></div>
             </div>
             <div class="episode-card" style="opacity: 0.5; cursor: default;">
                 <div class="episode-thumb" style="filter: grayscale(1);"></div>
-                <div class="episode-info"><div class="episode-title">الحلقة 4</div><div style="color: #888;">قريباً</div></div>
+                <div class="episode-info"><div class="episode-title">الحلقة 5</div><div style="color: #888; font-size: 0.85rem;">قريباً</div></div>
             </div>
+            <div class="episode-card" style="opacity: 0.5; cursor: default;">
+                <div class="episode-thumb" style="filter: grayscale(1);"></div>
+                <div class="episode-info"><div class="episode-title">الحلقة 6</div><div style="color: #888; font-size: 0.85rem;">قريباً</div></div>
+            </div>
+            <div class="episode-card" style="opacity: 0.5; cursor: default;">
+                <div class="episode-thumb" style="filter: grayscale(1);"></div>
+                <div class="episode-info"><div class="episode-title">الحلقة 7</div><div style="color: #888; font-size: 0.85rem;">قريباً</div></div>
+            </div>
+
         </div>
     </section>
 
     <script>
         const video = document.getElementById('customVideo');
         const overlay = document.getElementById('controlsOverlay');
-        const progressBar = document.getElementById('progressBar');
+        const progressWrapper = document.getElementById('progressWrapper');
+        const progressFilled = document.getElementById('progressFilled');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationTimeEl = document.getElementById('durationTime');
         const playIcon = document.getElementById('playIcon');
         const pauseIcon = document.getElementById('pauseIcon');
-        let hideTimer;
-
-        function handleVideoClick(e) {
-            if (e.target.closest('button') || e.target.closest('input')) return;
-            if (overlay.classList.contains('hide')) {
-                showControls();
-            } else {
-                overlay.classList.add('hide');
-                clearTimeout(hideTimer);
-            }
-        }
-
-        function showControls() {
-            overlay.classList.remove('hide');
-            clearTimeout(hideTimer);
-            if (!video.paused) {
-                hideTimer = setTimeout(() => overlay.classList.add('hide'), 4000);
-            }
-        }
+        
+        let uiTimer, tapTimer;
+        let isDraggingProgress = false;
+        let lastSecondLogged = -1;
 
         function playEpisode(num, url) {
             document.getElementById('playerWrapper').style.display = 'block';
             document.getElementById('playerEpTitle').innerText = `الحلقة ${num}`;
+            
+            video.pause();
             video.src = url;
-            video.play();
+            video.load(); 
+            
+            progressFilled.style.width = '0%';
+            currentTimeEl.textContent = "00:00";
+            durationTimeEl.textContent = "00:00";
+            isDraggingProgress = false;
+
+            let playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("التحميل جاهز، بانتظار ضغطة التشغيل من المستخدم", error);
+                });
+            }
+
             showControls();
             
             document.querySelectorAll('.episode-card').forEach((c, i) => {
@@ -209,57 +254,132 @@
             document.getElementById('playerWrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        function togglePlay(e) {
-            e.stopPropagation();
-            if (video.paused) video.play(); else video.pause();
-            showControls();
+        function showControls() {
+            overlay.classList.remove('hidden');
+            resetUITimer();
         }
 
-        function skip(time, e) {
-            e.stopPropagation();
+        function toggleUI() {
+            if (overlay.classList.contains('hidden')) {
+                showControls();
+            } else {
+                overlay.classList.add('hidden');
+                clearTimeout(uiTimer);
+            }
+        }
+
+        function resetUITimer() {
+            clearTimeout(uiTimer);
+            uiTimer = setTimeout(() => {
+                if (!video.paused && !isDraggingProgress) overlay.classList.add('hidden');
+            }, 3000);
+        }
+
+        function togglePlay() {
+            if (video.paused) { video.play(); resetUITimer(); } 
+            else { video.pause(); showControls(); }
+        }
+
+        function skip(time) {
             video.currentTime += time;
-            showControls();
+            if(!overlay.classList.contains('hidden')) resetUITimer();
         }
 
-        function seek(e) {
-            e.stopPropagation();
-            video.currentTime = (progressBar.value / 100) * video.duration;
+        function toggleFull() {
+            const container = document.getElementById('videoContainer');
+            if (!document.fullscreenElement) {
+                if(container.requestFullscreen) container.requestFullscreen();
+                else if(container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+            } else {
+                if(document.exitFullscreen) document.exitFullscreen();
+            }
         }
 
-        function toggleFull(e) {
-            e.stopPropagation();
-            if (!document.fullscreenElement) document.getElementById('videoContainer').requestFullscreen();
-            else document.exitFullscreen();
+        function closePlayer() {
+            video.pause();
+            document.getElementById('playerWrapper').style.display = 'none';
+            if (document.fullscreenElement) document.exitFullscreen();
         }
 
-        video.addEventListener('play', () => {
-            playIcon.style.display = 'none';
-            pauseIcon.style.display = 'block';
-            showControls();
-        });
+        video.addEventListener('play', () => { playIcon.style.display = 'none'; pauseIcon.style.display = 'block'; });
+        video.addEventListener('pause', () => { playIcon.style.display = 'block'; pauseIcon.style.display = 'none'; overlay.classList.remove('hidden'); });
 
-        video.addEventListener('pause', () => {
-            playIcon.style.display = 'block';
-            pauseIcon.style.display = 'none';
-            overlay.classList.remove('hide');
+        function formatTime(seconds) {
+            if(isNaN(seconds) || !isFinite(seconds)) return "00:00";
+            const m = Math.floor(seconds / 60), s = Math.floor(seconds % 60);
+            return `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        }
+
+        video.addEventListener('loadedmetadata', () => {
+            durationTimeEl.innerText = formatTime(video.duration);
         });
 
         video.addEventListener('timeupdate', () => {
-            if (!video.duration) return;
-            const percent = (video.currentTime / video.duration) * 100;
-            progressBar.value = percent;
-            document.getElementById('currentTime').innerText = formatTime(video.currentTime);
-            progressBar.style.background = `linear-gradient(to right, #E50914 ${percent}%, #333 ${percent}%)`;
+            if(isNaN(video.duration)) return;
+            if (!isDraggingProgress) { 
+                progressFilled.style.width = `${(video.currentTime / video.duration) * 100}%`; 
+                let currentSec = Math.floor(video.currentTime);
+                if(currentSec !== lastSecondLogged) { 
+                    currentTimeEl.textContent = formatTime(video.currentTime); 
+                    lastSecondLogged = currentSec; 
+                }
+            }
         });
 
-        video.addEventListener('loadedmetadata', () => {
-            document.getElementById('durationTime').innerText = formatTime(video.duration);
-        });
-
-        function formatTime(sec) {
-            const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
-            return `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        function updateProgressFromDrag(e) {
+            const rect = progressWrapper.getBoundingClientRect();
+            let clientX = e.type.includes('touch') ? (e.touches[0] ? e.touches[0].clientX : e.changedTouches[0].clientX) : e.clientX;
+            let x = clientX - rect.left;
+            x = Math.max(0, Math.min(x, rect.width)); 
+            let pct = x / rect.width;
+            progressFilled.style.width = `${pct * 100}%`;
+            currentTimeEl.textContent = formatTime(pct * video.duration);
+            return pct;
         }
+
+        progressWrapper.addEventListener('mousedown', (e) => { isDraggingProgress = true; video.currentTime = updateProgressFromDrag(e) * video.duration; resetUITimer(); });
+        progressWrapper.addEventListener('touchstart', (e) => { isDraggingProgress = true; video.currentTime = updateProgressFromDrag(e) * video.duration; resetUITimer(); }, {passive: true});
+        
+        document.addEventListener('mousemove', (e) => { if(isDraggingProgress) { updateProgressFromDrag(e); resetUITimer(); } });
+        document.addEventListener('touchmove', (e) => { if(isDraggingProgress) { updateProgressFromDrag(e); resetUITimer(); } }, {passive: true});
+        
+        document.addEventListener('mouseup', (e) => { if(isDraggingProgress) { video.currentTime = updateProgressFromDrag(e) * video.duration; isDraggingProgress = false; } });
+        document.addEventListener('touchend', (e) => { if(isDraggingProgress) { video.currentTime = updateProgressFromDrag(e) * video.duration; isDraggingProgress = false; } });
+
+        function setupSmartTouch(zoneId, skipValue, indicatorId) {
+            const zone = document.getElementById(zoneId); 
+            let lastTap = 0;
+            zone.addEventListener('touchstart', (e) => {
+                let ct = new Date().getTime();
+                if (ct - lastTap < 300 && ct - lastTap > 0) { 
+                    clearTimeout(tapTimer); 
+                    skip(skipValue); 
+                    const ind = document.getElementById(indicatorId); 
+                    ind.classList.add('active'); 
+                    clearTimeout(ind.hideTimer); 
+                    ind.hideTimer = setTimeout(() => ind.classList.remove('active'), 400); 
+                    e.preventDefault(); 
+                } else { 
+                    tapTimer = setTimeout(() => toggleUI(), 300); 
+                } 
+                lastTap = ct;
+            }, {passive: false});
+            
+            zone.addEventListener('dblclick', (e) => {
+                skip(skipValue);
+                const ind = document.getElementById(indicatorId); 
+                ind.classList.add('active'); 
+                clearTimeout(ind.hideTimer); 
+                ind.hideTimer = setTimeout(() => ind.classList.remove('active'), 400);
+            });
+        }
+
+        setupSmartTouch('tap-left', -10, 'ind-left');
+        setupSmartTouch('tap-right', 10, 'ind-right');
+        
+        document.getElementById('tap-mid').addEventListener('touchstart', (e) => { e.preventDefault(); toggleUI(); });
+        document.getElementById('tap-mid').addEventListener('click', () => { toggleUI(); });
+
     </script>
 </body>
 </html>
