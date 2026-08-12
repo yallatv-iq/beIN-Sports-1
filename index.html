@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>بث مباشر - باريس سان جيرمان × أستون فيلا</title>
+    <title>BASSAM - Player</title>
     <link rel="icon" type="image/png" href="data:," />
     <meta name="referrer" content="no-referrer" />
 
@@ -12,10 +12,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
 
-    <!-- Lucide Icons -->
+    <!-- Lucide Icons (أحدث من Feather) -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js" defer></script>
 
-    <!-- Shaka Player -->
+    <!-- Shaka Player (تحميل عادي، ليس ES Module) -->
     <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.7.13/dist/shaka-player.compiled.js" defer></script>
 
     <style>
@@ -462,9 +462,6 @@
                     <button class="control-btn" id="mute-btn" title="كتم الصوت">
                         <i data-lucide="volume-2"></i>
                     </button>
-                    <button class="control-btn" id="server-btn" title="السيرفرات">
-                        <i data-lucide="server"></i>
-                    </button>
                     <button class="control-btn" id="quality-btn" title="الجودة">
                         <i data-lucide="settings"></i>
                     </button>
@@ -487,9 +484,6 @@
             </div>
         </div>
 
-        <div id="server-popup" class="popup-menu">
-            <ul id="server-list" class="popup-menu-list"></ul>
-        </div>
         <div id="quality-popup" class="popup-menu">
             <ul id="quality-list" class="popup-menu-list"></ul>
         </div>
@@ -511,19 +505,15 @@
     </div>
 
     <script>
-        // ========== كود المشغل مع دعم السيرفرات المتعددة ==========
+        // ========== كود المشغل الحديث ==========
         document.addEventListener('DOMContentLoaded', () => {
             const CONFIG = {
-                // قائمة السيرفرات المتعددة
-                SERVERS: [
-                    { name: 'سيرفر 1 - Periscope', url: 'https://prod-fastly-eu-west-1.video.pscp.tv/Transcoding/v1/hls/bM6nWumwgu5L5J_TnGPhYZgCzPftZyp1QOWo3LBkU9UgQyqaA8GQ2udmbhGIkf9ivZ1WgeCaArB-_-Wtx4rsuw/non_transcode/eu-west-1/periscope-replay-direct-prod-eu-west-1-public/master_dynamic_delta.m3u8?type=live' },
-                    { name: 'سيرفر 2 - Facebook', url: 'https://scontent.fbgw43-2.fna.fbcdn.net/hvideo-pnb-ldc/_nc_cat-1/_nc_sr_t-4/v/rASfITlO05yQig_Tzr0FxEgW8bqbf2gVH4IWGjikUXJAW-A/_nc_ohc-Z_D_GuQNJB8Q7kNvwHmj_vl/live-dash/dash-abr5/1029238366572932.mpd?_nc_ad=z-m&_nc_cid=0&_nc_rml=0&_nc_zt=28&aaf=1&ccb=2-4&ms=m_CTPA&replica=1&sc_t=1&oh=00_AQG4iyuGHgoqTZZT7HFL0MEdubCHN42qBB9n1GozF9c0dQ&oe=6A7E8E89' },
-                    { name: 'سيرفر 3 - Yallakoora', url: 'https://jbvhgvggggggggggggggggvytcrrrrrrrrrrrrx6xtyyyyyyyyyyyyyyxdxt.yallakoora.org/ar_bsportz1/index.mpd' },
-                    { name: 'سيرفر 4 - Periscope 2', url: 'https://prod-fastly-eu-west-1.video.pscp.tv/Transcoding/v1/hls/nih6ejfrzBMZJIbcOKR54rNsVF_y3IB1lkyZx6AOUlVyfosSbtQLM9v2x5hBHPbEuq5HSupHidE8xb2zGaSFVw/non_transcode/eu-west-1/periscope-replay-direct-prod-eu-west-1-public/master_dynamic_delta.m3u8?type=live' },
-                    { name: 'سيرفر 5 - Periscope 1 (مكرر)', url: 'https://prod-fastly-eu-west-1.video.pscp.tv/Transcoding/v1/hls/bM6nWumwgu5L5J_TnGPhYZgCzPftZyp1QOWo3LBkU9UgQyqaA8GQ2udmbhGIkf9ivZ1WgeCaArB-_-Wtx4rsuw/non_transcode/eu-west-1/periscope-replay-direct-prod-eu-west-1-public/master_dynamic_delta.m3u8?type=live' },
-                    { name: 'سيرفر 6 - Token', url: 'http://next.allmycss.online:8080/assets/res2/java2/1313.css?x=/hls/&token=bDFDME9YU2hKemJqNDZv' }
-                ],
-                MAX_RETRIES_PER_SERVER: 1, // محاولة واحدة لكل سيرفر ثم الانتقال للتالي
+                STREAM_URL: 'https://scccrwb-live.cdn.intigral-ott.net/bpk-tv/AD1_HEVC/wv-pr/manifest.mpd',
+                DRM_KEYS: {
+                    '2810c600349a0cd3a920c7d99bbe00b1': '3911049bf0e342e70e0fba2cba6aa628'
+                },
+                MAX_RETRIES: 5,
+                RETRY_DELAY_MS: 2000,
                 TELEGRAM_DELAY_MS: 60_000,
                 CONTROLS_HIDE_DELAY: 3500,
                 EXPAND_MODES: ['contain', 'cover', 'fill'],
@@ -536,8 +526,8 @@
                 #controlsTimeout;
                 #expandIndex = 0;
                 #playbackAllowed = false;
+                #retryTimer;
                 #gesture = { active: false, type: null, startY: 0, startValue: 0 };
-                #currentServerIndex = 0;
 
                 constructor() {
                     this.elements = {
@@ -560,13 +550,10 @@
                         progressPlayed: document.getElementById('progress-played'),
                         progressScrubber: document.getElementById('progress-scrubber'),
                         progressContainer: document.getElementById('progress-bar-container'),
-                        serverBtn: document.getElementById('server-btn'),
                         qualityBtn: document.getElementById('quality-btn'),
                         audioBtn: document.getElementById('audio-btn'),
-                        serverPopup: document.getElementById('server-popup'),
                         qualityPopup: document.getElementById('quality-popup'),
                         audioPopup: document.getElementById('audio-popup'),
-                        serverList: document.getElementById('server-list'),
                         qualityList: document.getElementById('quality-list'),
                         audioList: document.getElementById('audio-list'),
                         telegramDialog: document.getElementById('telegram-dialog-overlay'),
@@ -580,19 +567,15 @@
                     this.#video = this.elements.video;
                     this.#video.crossOrigin = 'anonymous';
 
+                    // التحقق من وجود Shaka
                     if (typeof shaka === 'undefined') {
                         return this.#showError('خطأ', 'لم يتم تحميل Shaka Player.');
                     }
 
                     this.#player = new shaka.Player(this.#video);
                     this.#player.configure({
-                        manifest: {
-                            dash: { ignoreMinBufferTime: true },
-                            hls: {
-                                useSafariBehaviorForLive: true,
-                                ignoreTextStreamFailures: true
-                            }
-                        },
+                        drm: { clearKeys: CONFIG.DRM_KEYS },
+                        manifest: { dash: { ignoreMinBufferTime: true } },
                         streaming: {
                             rebufferingGoal: 2,
                             bufferingGoal: 10,
@@ -607,70 +590,36 @@
 
                 async #init() {
                     lucide.createIcons();
-                    this.#populateServers();
-
                     if (localStorage.getItem('telegramDialogDismissed') === 'true') {
                         this.#playbackAllowed = true;
                     } else {
                         setTimeout(() => this.#openDialog(), CONFIG.TELEGRAM_DELAY_MS);
                     }
-
-                    // ابدأ بأول سيرفر
-                    await this.#loadServer(0);
+                    await this.#loadStream();
                 }
 
-                async #loadServer(index) {
-                    if (index >= CONFIG.SERVERS.length) {
-                        this.#showError('فشل التحميل', 'جميع السيرفرات غير متاحة حالياً. حاول لاحقاً.');
-                        return;
-                    }
-
-                    this.#currentServerIndex = index;
+                async #loadStream() {
                     this.#showLoading(true);
                     this.#hideError();
-                    this.#updateServerActive();
-
-                    try {
-                        await this.#player.load(CONFIG.SERVERS[index].url);
-                        this.#showLoading(false);
-                        this.#showControls();
-                        if (this.#playbackAllowed) {
-                            this.#video.muted = false;
-                            this.#video.play().catch(() => {});
+                    for (let i = 1; i <= CONFIG.MAX_RETRIES; i++) {
+                        try {
+                            await this.#player.load(CONFIG.STREAM_URL);
+                            this.#showLoading(false);
+                            this.#showControls();
+                            if (this.#playbackAllowed) {
+                                this.#video.muted = false;
+                                this.#video.play().catch(() => {});
+                            }
+                            return;
+                        } catch (err) {
+                            console.warn(`محاولة ${i} فشلت:`, err);
+                            if (i === CONFIG.MAX_RETRIES) {
+                                this.#showError('فشل التحميل', 'تعذر تشغيل البث بعد عدة محاولات.');
+                            } else {
+                                await new Promise(r => setTimeout(r, CONFIG.RETRY_DELAY_MS));
+                            }
                         }
-                    } catch (err) {
-                        console.warn(`فشل السيرفر ${index + 1}:`, err);
-                        this.#showLoading(false);
-                        // الانتقال تلقائيًا للسيرفر التالي
-                        setTimeout(() => this.#loadServer(index + 1), 1000);
                     }
-                }
-
-                #populateServers() {
-                    const list = this.elements.serverList;
-                    list.innerHTML = '';
-                    CONFIG.SERVERS.forEach((server, index) => {
-                        const li = document.createElement('li');
-                        li.className = `menu-item ${index === this.#currentServerIndex ? 'active' : ''}`;
-                        li.innerHTML = `${server.name} <span class="check-icon"><i data-lucide="check"></i></span>`;
-                        li.onclick = () => {
-                            this.#loadServer(index);
-                            this.#togglePopup(this.elements.serverBtn, this.elements.serverPopup);
-                        };
-                        list.appendChild(li);
-                    });
-                    lucide.createIcons();
-                }
-
-                #updateServerActive() {
-                    const items = this.elements.serverList.querySelectorAll('.menu-item');
-                    items.forEach((item, index) => {
-                        if (index === this.#currentServerIndex) {
-                            item.classList.add('active');
-                        } else {
-                            item.classList.remove('active');
-                        }
-                    });
                 }
 
                 #showLoading(show) { this.elements.spinner.style.display = show ? 'flex' : 'none'; }
@@ -709,7 +658,6 @@
                     this.#closePopups();
                 }
                 #closePopups() {
-                    this.elements.serverPopup.style.display = 'none';
                     this.elements.qualityPopup.style.display = 'none';
                     this.elements.audioPopup.style.display = 'none';
                 }
@@ -883,8 +831,22 @@
                     this.#player.addEventListener('error', (e) => {
                         const err = e.detail;
                         console.error('Shaka Error:', err);
-                        // الانتقال للسيرفر التالي تلقائيًا
-                        this.#loadServer(this.#currentServerIndex + 1);
+                        const recoverable = [
+                            shaka.util.Error.Code.HTTP_ERROR,
+                            shaka.util.Error.Code.TIMEOUT,
+                            shaka.util.Error.Code.BAD_HTTP_STATUS,
+                            shaka.util.Error.Code.SEGMENT_MISSING
+                        ];
+                        if (recoverable.includes(err.code)) {
+                            this.#showLoading(true);
+                            clearTimeout(this.#retryTimer);
+                            this.#retryTimer = setTimeout(() => {
+                                this.#player.load(CONFIG.STREAM_URL).then(() => this.#showLoading(false))
+                                    .catch(() => this.#showError('انقطع الاتصال', 'فشلت إعادة الاتصال.'));
+                            }, 2000);
+                        } else {
+                            this.#showError('خطأ', err.detail?.message || 'لا يمكن متابعة البث.');
+                        }
                     });
                     this.#player.addEventListener('trackschanged', () => {
                         this.#populateQuality();
@@ -928,18 +890,6 @@
                     });
                     el.muteBtn.addEventListener('click', (e) => { e.stopPropagation();
                         this.#video.muted = !this.#video.muted; });
-                    el.serverBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.#togglePopup(el.serverBtn, el.serverPopup, this.#populateServers);
-                    });
-                    el.qualityBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.#togglePopup(el.qualityBtn, el.qualityPopup, this.#populateQuality);
-                    });
-                    el.audioBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.#togglePopup(el.audioBtn, el.audioPopup, this.#populateAudio);
-                    });
                     el.pipBtn.addEventListener('click', async (e) => {
                         e.stopPropagation();
                         document.pictureInPictureElement ? await document.exitPictureInPicture() : await this.#video
@@ -975,12 +925,20 @@
                         document.addEventListener('pointermove', onMove);
                         document.addEventListener('pointerup', onUp);
                     });
+                    el.qualityBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.#togglePopup(el.qualityBtn, el.qualityPopup, this.#populateQuality);
+                    });
+                    el.audioBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.#togglePopup(el.audioBtn, el.audioPopup, this.#populateAudio);
+                    });
                     el.joinBtn.addEventListener('click', () => this.#allowPlayback());
                     el.alreadyBtn.addEventListener('click', () => this.#allowPlayback());
                 }
             }
 
-            // انتظر تحميل Shaka
+            // انتظر تحميل Shaka (defer يضمن الترتيب)
             if (typeof shaka === 'undefined') {
                 window.addEventListener('load', () => new VideoPlayer());
             } else {
