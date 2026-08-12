@@ -1,347 +1,992 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <title>ملزمة الرياضيات - نصوص دقيقة</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>بث مباشر - باريس سان جيرمان × أستون فيلا</title>
+    <link rel="icon" type="image/png" href="data:," />
+    <meta name="referrer" content="no-referrer" />
+
+    <!-- الخطوط -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js" defer></script>
+
+    <!-- Shaka Player -->
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.7.13/dist/shaka-player.compiled.js" defer></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-        
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f0f4f8;
-            color: #333;
+        :root {
+            --primary: #ffc107;
+            --live: #e62e2e;
+            --not-live: rgba(128, 128, 128, 0.85);
+            --menu-bg: rgba(25, 25, 25, 0.95);
+            --controls-transition: 0.25s ease;
+            --icon-size: 22px;
+            --large-icon-size: 42px;
+        }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
-            font-size: 18px;
-            line-height: 1.8;
+            padding: 0;
         }
-        .container {
-            max-width: 900px;
-            margin: auto;
+        body,
+        html {
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
-        .card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            padding: 30px;
-            border-right: 6px solid #d96f43; /* لون برتقالي مميز */
-        }
-        .question-header {
-            display: flex;
-            align-items: center;
-            color: #8a2a2a; /* لون أحمر داكن مشابه للصورة */
-            font-weight: bold;
-            font-size: 1.3em;
-            margin-bottom: 20px;
-        }
-        .q-number {
-            background-color: #e6915c;
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
+        #player-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-left: 15px;
-            font-size: 1.1em;
-            flex-shrink: 0;
+            overflow: hidden;
         }
-        .solution-title {
-            color: #d96f43;
-            font-weight: bold;
-            font-size: 1.5em;
-            text-shadow: 1px 1px 0px #eee;
-            margin-bottom: 15px;
-            display: inline-block;
+        #video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
-        /* تنسيقات الرياضيات */
-        .math {
-            font-family: 'Times New Roman', serif;
-            font-size: 1.2em;
-            font-weight: bold;
-            direction: ltr;
-            display: inline-block;
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
         }
-        .math-block {
-            direction: ltr;
-            text-align: left;
-            margin: 15px 0;
-            font-family: 'Times New Roman', serif;
-            font-size: 1.4em;
-            font-weight: bold;
+        #loading-spinner {
+            position: absolute;
+            z-index: 100;
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            pointer-events: none;
         }
-        .math-line {
-            margin-bottom: 10px;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
-        /* الكسر الرياضي الاحترافي */
-        .frac {
-            display: inline-flex;
+        #error-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
             flex-direction: column;
             align-items: center;
-            vertical-align: middle;
-            margin: 0 4px;
-            font-size: 0.9em;
-        }
-        .frac .top {
-            border-bottom: 2px solid #000;
-            padding: 0 4px;
-        }
-        .frac .bottom {
-            padding: 0 4px;
-        }
-        /* جداول */
-        table {
-            border-collapse: collapse;
-            width: auto;
-            min-width: 250px;
-            margin: 20px auto;
-            direction: ltr;
-        }
-        th, td {
-            border: 2px solid #fff;
-            padding: 8px 15px;
+            justify-content: center;
+            color: #fff;
             text-align: center;
-            font-family: 'Times New Roman', serif;
-            font-size: 1.2em;
+            padding: 2rem;
         }
-        th { background-color: #16365c; color: white; }
-        td { background-color: #e5edf5; }
-        
-        /* الرسم الهندسي */
-        .graph-box {
-            border: 2px solid #333;
-            display: inline-block;
-            padding: 15px;
-            background: white;
-            margin-right: 20px;
+        #error-overlay .lucide {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        .controls-overlay {
+            position: absolute;
+            z-index: 10;
+            transition: opacity var(--controls-transition), visibility var(--controls-transition);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .controls-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        #center-controls {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        .center-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.7));
+            transition: transform 0.2s;
+        }
+        .center-btn:active {
+            transform: scale(0.9);
+        }
+        .center-btn .lucide {
+            width: 44px;
+            height: 44px;
+        }
+        #seek-backward-center-btn .lucide {
+            transform: scaleX(-1);
+        }
+        #bottom-controls-container {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px 16px 12px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+        }
+        .progress-bar-container {
+            width: 100%;
+            padding: 8px 0 6px;
+            cursor: pointer;
+            touch-action: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-played {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.15s linear;
+        }
+        .progress-scrubber {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .progress-bar-container:hover .progress-scrubber,
+        .progress-bar-container:active .progress-scrubber {
+            opacity: 1;
+        }
+        .bottom-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+        }
+        .controls-left,
+        .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .control-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 4px;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .control-btn:active {
+            transform: scale(0.9);
+        }
+        .control-btn .lucide {
+            width: var(--icon-size);
+            height: var(--icon-size);
+        }
+        #live-indicator {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            color: #fff;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+        }
+        #live-indicator.is-live {
+            background-color: var(--live);
+        }
+        #live-indicator.is-not-live {
+            background-color: var(--not-live);
+            cursor: pointer;
+        }
+        .popup-menu {
+            position: absolute;
+            bottom: 70px;
+            width: 200px;
+            background: var(--menu-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 10px;
+            z-index: 20;
+            max-height: 220px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            overscroll-behavior: contain;
+        }
+        .popup-menu-list {
+            list-style: none;
+            padding: 6px;
+            margin: 0;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #fff;
+            transition: background 0.2s;
+        }
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .menu-item.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .menu-item .check-icon {
+            display: none;
+            color: var(--primary);
+        }
+        .menu-item.active .check-icon {
+            display: block;
+        }
+        #telegram-dialog-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        #telegram-dialog-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .dialog-box {
+            background: rgba(30, 30, 30, 0.95);
+            color: #fff;
+            padding: 2rem 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 340px;
+            width: calc(100% - 3rem);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transform: scale(0.92);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #telegram-dialog-overlay.visible .dialog-box {
+            transform: scale(1);
+        }
+        .dialog-box .dialog-icon {
+            width: 52px;
+            height: 52px;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        .dialog-box h3 {
+            margin: 0 0 0.5rem;
+            font-size: 1.3rem;
+        }
+        .dialog-box p {
+            margin: 0 0 1.5rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+        .dialog-join-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: #000;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: transform 0.2s, background 0.2s;
+            border: none;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .dialog-join-btn:active {
+            transform: scale(0.96);
+        }
+        .dialog-secondary-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding: 6px;
+            transition: color 0.2s;
+            width: 100%;
+        }
+        .dialog-secondary-btn:hover {
+            color: #fff;
+        }
+        .gesture-hint {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 16px 10px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .gesture-hint .lucide {
+            width: 28px;
+            height: 28px;
+        }
+        #brightness-hint {
+            left: 20px;
+        }
+        #volume-hint {
+            right: 20px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-
-    <div class="card">
-        <div class="question-header">
-            <div class="q-number">1</div>
-            <div>ارسم منحنيات كل من الدوال الآتية: &nbsp; <span class="math">أ) f(x) = -4x + 3</span></div>
+    <div id="player-container">
+        <div id="loading-spinner"></div>
+        <div id="error-overlay">
+            <i data-lucide="alert-triangle"></i>
+            <h3 id="error-title">فشل تحميل البث</h3>
+            <p id="error-message">قد يكون البث متوقفاً حالياً أو توجد مشكلة في الشبكة.</p>
         </div>
-        <div class="solution-title">الحل:</div>
-        <span style="font-weight: bold;">بما انه الدالة خطية (حدودية) فيمكن تمثيلها بنقطتين فقط</span>
-        
-        <div style="display: flex; flex-wrap: wrap; align-items: center; margin-top: 20px;">
-            <div class="graph-box">
-                <svg width="200" height="200" viewBox="0 0 200 200">
-                    <line x1="20" y1="100" x2="180" y2="100" stroke="black" stroke-width="2"/>
-                    <line x1="100" y1="20" x2="100" y2="180" stroke="black" stroke-width="2"/>
-                    <line x1="40" y1="96" x2="40" y2="104" stroke="black"/><line x1="60" y1="96" x2="60" y2="104" stroke="black"/>
-                    <line x1="80" y1="96" x2="80" y2="104" stroke="black"/><line x1="120" y1="96" x2="120" y2="104" stroke="black"/>
-                    <line x1="140" y1="96" x2="140" y2="104" stroke="black"/><line x1="160" y1="96" x2="160" y2="104" stroke="black"/>
-                    <line x1="96" y1="40" x2="104" y2="40" stroke="black"/><line x1="96" y1="60" x2="104" y2="60" stroke="black"/>
-                    <line x1="96" y1="80" x2="104" y2="80" stroke="black"/><line x1="96" y1="120" x2="104" y2="120" stroke="black"/>
-                    <line x1="96" y1="140" x2="104" y2="140" stroke="black"/><line x1="96" y1="160" x2="104" y2="160" stroke="black"/>
-                    <text x="10" y="105" fill="red" font-size="12">x</text>
-                    <text x="96" y="195" fill="red" font-size="12">y</text>
-                    <circle cx="100" cy="40" r="4" fill="#6a4c9c"/>
-                    <text x="108" y="44" font-size="12">(0, 3)</text>
-                    <circle cx="120" cy="120" r="4" fill="#6a4c9c"/>
-                    <text x="128" y="124" font-size="12">(1, -1)</text>
-                    <line x1="100" y1="40" x2="120" y2="120" stroke="#3b699c" stroke-width="2"/>
-                </svg>
+
+        <div id="video-wrapper">
+            <video id="video" autoplay playsinline muted
+                poster="https://up6.cc/2025/03/174328431874221.png"
+                style="width:100%;height:100%;object-fit:fill !important;"
+                data-shaka-player>
+            </video>
+        </div>
+
+        <div id="brightness-hint" class="gesture-hint">
+            <i data-lucide="sun"></i>
+            <span id="brightness-value">100%</span>
+        </div>
+        <div id="volume-hint" class="gesture-hint">
+            <i data-lucide="volume-2"></i>
+            <span id="volume-value">100%</span>
+        </div>
+
+        <div id="center-controls" class="controls-overlay visible">
+            <button class="center-btn" id="seek-backward-center-btn" title="تقديم 10 ثواني">
+                <i data-lucide="fast-forward"></i>
+            </button>
+            <button class="center-btn" id="play-pause-center-btn" title="تشغيل / إيقاف">
+                <i data-lucide="play"></i>
+            </button>
+            <button class="center-btn" id="seek-forward-center-btn" title="رجوع 10 ثواني">
+                <i data-lucide="rewind"></i>
+            </button>
+        </div>
+
+        <div id="bottom-controls-container" class="controls-overlay">
+            <div class="progress-bar-container" id="progress-bar-container">
+                <div class="progress-bar">
+                    <div class="progress-played" id="progress-played"></div>
+                    <div class="progress-scrubber" id="progress-scrubber"></div>
+                </div>
             </div>
-            <div>
-                <table>
-                    <tr><th>x</th><th>y</th><th>(x, y)</th></tr>
-                    <tr><td>0</td><td>3</td><td>(0, 3)</td></tr>
-                    <tr><td>1</td><td>-1</td><td>(1, -1)</td></tr>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="question-header">
-            <div class="q-number">2</div>
-            <div>جد مجال كل من الدوال الآتية:<br><br><span class="math">أ) f(x) = x³ + x² - 3</span></div>
-        </div>
-        <div class="math-block">
-            <span style="font-family: 'Cairo', sans-serif;">مجال </span> f = {x : x &isin; R, x³ + x² - 3 &isin; R}<br><br>
-            &there4; <span style="font-family: 'Cairo', sans-serif;">اوسع مجال للدالة كل</span> R
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="question-header">
-            <div class="q-number">1</div>
-            <div>اذا كانت <span class="math">y</span> تتغير طردياً مع <span class="math">x</span><br>وكان <span class="math">y = 10</span> عندما <span class="math">x = 5</span>.<br>جد قيمه <span class="math">y</span> عندما <span class="math">x = 15</span>.</div>
-        </div>
-        <div class="solution-title">الحل:</div>
-        <div class="math-block">
-            <div class="math-line">y &prop; x &rarr; y = kx &rarr; 10 = k(5)</div>
-            <div class="math-line">k = <div class="frac"><span class="top">10</span><span class="bottom">5</span></div> &rarr; k = 2</div>
-            <div class="math-line">y = kx &rarr; y = (2)(15) &rarr; y = 30</div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="question-header">
-            <div class="q-number">3</div>
-            <div>اذا كان <span class="math">z</span> يتغير تغيراً مشتركاً مع <span class="math">x, y</span><br>وكان <span class="math">y = 4</span> عندما <span class="math">x = 1</span> , <span class="math">z = 2</span><br>جد ثابت التغير.</div>
-        </div>
-        <div class="solution-title">الحل:</div>
-        <div class="math-block">
-            <div class="math-line">z &prop; y.x &rarr; z = kyx</div>
-            <div class="math-line">&rarr; 2 = k(4)(1)</div>
-            <div class="math-line">2 = 4k &rarr; k = <div class="frac"><span class="top">2</span><span class="bottom">4</span></div></div>
-            <div class="math-line">&rarr; k = <div class="frac"><span class="top">1</span><span class="bottom">2</span></div></div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="question-header">
-            <div class="q-number">1</div>
-            <div>حول الى التقدير الدائري كل من قياس الزوايا الآتية: <span class="math">300&deg;, 15&deg;, 120&deg;, 30&deg;</span></div>
-        </div>
-        <div class="solution-title">الحل:</div>
-        <div class="math-block" style="font-size: 1.2em;">
-            <div class="math-line">
-                30&deg; &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top">&theta;</span><span class="bottom">D&deg;</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top">&theta;</span><span class="bottom">30&deg;</span></div> &rarr; &theta; &times; 180&deg; = 30&deg; &times; &pi;
-            </div>
-            <div class="math-line">
-                &there4; &theta; = <div class="frac"><span class="top">30&deg;&times;&pi;</span><span class="bottom">180&deg;</span></div> &rarr; &theta; = <div class="frac"><span class="top">&pi;</span><span class="bottom">6</span></div>
-            </div>
-            <br>
-            <div class="math-line">
-                300&deg; &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top">&theta;</span><span class="bottom">D&deg;</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top">&theta;</span><span class="bottom">300&deg;</span></div> &rarr; &theta; &times; 180&deg; = 300&deg; &times; &pi; &there4; &theta; = <div class="frac"><span class="top">300&deg;&times;&pi;</span><span class="bottom">180&deg;</span></div> &rarr; &theta; = <div class="frac"><span class="top">5&pi;</span><span class="bottom">3</span></div>
+            <div class="bottom-controls">
+                <div class="controls-left">
+                    <button class="control-btn" id="play-pause-btn" title="تشغيل / إيقاف">
+                        <i data-lucide="play"></i>
+                    </button>
+                    <button class="control-btn" id="mute-btn" title="كتم الصوت">
+                        <i data-lucide="volume-2"></i>
+                    </button>
+                    <button class="control-btn" id="server-btn" title="السيرفرات">
+                        <i data-lucide="server"></i>
+                    </button>
+                    <button class="control-btn" id="quality-btn" title="الجودة">
+                        <i data-lucide="settings"></i>
+                    </button>
+                    <button class="control-btn" id="audio-btn" title="الصوت">
+                        <i data-lucide="headphones"></i>
+                    </button>
+                    <span id="live-indicator"></span>
+                </div>
+                <div class="controls-right">
+                    <button class="control-btn" id="pip-btn" title="صورة داخل صورة">
+                        <i data-lucide="picture-in-picture-2"></i>
+                    </button>
+                    <button class="control-btn" id="expand-btn" title="تغيير وضع العرض">
+                        <i data-lucide="expand"></i>
+                    </button>
+                    <button class="control-btn" id="fullscreen-btn" title="ملء الشاشة">
+                        <i data-lucide="maximize"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <hr style="border: 1px dashed #ccc; margin: 30px 0;">
-
-        <div class="question-header">
-            <div class="q-number">2</div>
-            <div>حول كلا من الزوايا النصف قطرية الآتية الى التقدير الستيني <span class="math"> <div class="frac"><span class="top">5&pi;</span><span class="bottom">6</span></div> , <div class="frac"><span class="top">&pi;</span><span class="bottom">3</span></div> , <div class="frac"><span class="top">1</span><span class="bottom">3</span></div> , <div class="frac"><span class="top">3&pi;</span><span class="bottom">5</span></div></span></div>
+        <div id="server-popup" class="popup-menu">
+            <ul id="server-list" class="popup-menu-list"></ul>
         </div>
-        <div class="solution-title">الحل:</div>
-        <div class="math-block" style="font-size: 1.2em;">
-            <div class="math-line">
-                <div class="frac"><span class="top">3&pi;</span><span class="bottom">5</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top">&theta;</span><span class="bottom">D&deg;</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top"><div class="frac"><span class="top">3&pi;</span><span class="bottom">5</span></div></span><span class="bottom">D&deg;</span></div> &rarr; D&deg; &times; &pi; = <div class="frac"><span class="top">3&pi;</span><span class="bottom">5</span></div> &times; 180&deg;
-            </div>
-            <div class="math-line">
-                D&deg; = <div class="frac"><span class="top">3&times;180&deg;</span><span class="bottom">5</span></div> &rarr; D&deg; = 108&deg;
-            </div>
-            <br>
-            <div class="math-line">
-                <div class="frac"><span class="top">5&pi;</span><span class="bottom">6</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top">&theta;</span><span class="bottom">D&deg;</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top"><div class="frac"><span class="top">5&pi;</span><span class="bottom">6</span></div></span><span class="bottom">D&deg;</span></div> &rarr; D&deg; &times; &pi; = <div class="frac"><span class="top">5&pi;</span><span class="bottom">6</span></div> &times; 180&deg;
-            </div>
-            <div class="math-line">
-                D&deg; = <div class="frac"><span class="top">5&times;180&deg;</span><span class="bottom">6</span></div> &rarr; D&deg; = 150&deg;
-            </div>
-            <br>
-            <div class="math-line">
-                <div class="frac"><span class="top">&pi;</span><span class="bottom">3</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top">&theta;</span><span class="bottom">D&deg;</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top"><div class="frac"><span class="top">&pi;</span><span class="bottom">3</span></div></span><span class="bottom">D&deg;</span></div> &rarr; D&deg; &times; &pi; = <div class="frac"><span class="top">&pi;</span><span class="bottom">3</span></div> &times; 180&deg;
-            </div>
-            <div class="math-line">
-                D&deg; = 60&deg;
-            </div>
-            <br>
-            <div class="math-line">
-                <div class="frac"><span class="top">1</span><span class="bottom">3</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top">&theta;</span><span class="bottom">D&deg;</span></div> &rarr; <div class="frac"><span class="top">&pi;</span><span class="bottom">180&deg;</span></div> = <div class="frac"><span class="top"><div class="frac"><span class="top">1</span><span class="bottom">3</span></div></span><span class="bottom">D&deg;</span></div> &rarr; D&deg; &times; &pi; = <div class="frac"><span class="top">1</span><span class="bottom">3</span></div> &times; 180&deg;
-            </div>
-            <div class="math-line">
-                D&deg; = <div class="frac"><span class="top">1</span><span class="bottom">3</span></div> &times; <div class="frac"><span class="top">180&deg;</span><span class="bottom">&pi;</span></div> &rarr; D&deg; = <div class="frac"><span class="top">60</span><span class="bottom">3.14</span></div> &rarr; D&deg; = 19.10&deg;
+        <div id="quality-popup" class="popup-menu">
+            <ul id="quality-list" class="popup-menu-list"></ul>
+        </div>
+        <div id="audio-popup" class="popup-menu">
+            <ul id="audio-list" class="popup-menu-list"></ul>
+        </div>
+
+        <div id="telegram-dialog-overlay">
+            <div class="dialog-box">
+                <i data-lucide="send" class="dialog-icon"></i>
+                <h3>يلزم الانضمام لمتابعة البث</h3>
+                <p>اضغط على الزر أدناه للانضمام إلى قناتنا على التليجرام، ثم استمتع بالمشاهدة.</p>
+                <a href="https://t.me/HanteraTV" target="_blank" rel="noopener" class="dialog-join-btn" id="join-telegram-btn">
+                    الانضمام والمتابعة
+                </a>
+                <button id="already-joined-btn" class="dialog-secondary-btn">لقد اشتركت بالفعل</button>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="question-header">
-            <div class="q-number">1</div>
-            <div>جد ميل المستقيم المار بالنقطتين <span class="math">(2, 0) (-2, 0)</span></div>
-        </div>
-        <div class="math-block">
-            <div class="math-line">m = <div class="frac"><span class="top">y&#8322; - y&#8321;</span><span class="bottom">x&#8322; - x&#8321;</span></div> &rarr; m = <div class="frac"><span class="top">0 - 0</span><span class="bottom">2 + 2</span></div> = <div class="frac"><span class="top">0</span><span class="bottom">4</span></div> &rarr; m = 0</div>
-        </div>
-    </div>
+    <script>
+        // ========== كود المشغل مع دعم السيرفرات المتعددة ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            const CONFIG = {
+                // قائمة السيرفرات المتعددة
+                SERVERS: [
+                    { name: 'سيرفر 1 - Periscope', url: 'https://prod-fastly-eu-west-1.video.pscp.tv/Transcoding/v1/hls/bM6nWumwgu5L5J_TnGPhYZgCzPftZyp1QOWo3LBkU9UgQyqaA8GQ2udmbhGIkf9ivZ1WgeCaArB-_-Wtx4rsuw/non_transcode/eu-west-1/periscope-replay-direct-prod-eu-west-1-public/master_dynamic_delta.m3u8?type=live' },
+                    { name: 'سيرفر 2 - Facebook', url: 'https://scontent.fbgw43-2.fna.fbcdn.net/hvideo-pnb-ldc/_nc_cat-1/_nc_sr_t-4/v/rASfITlO05yQig_Tzr0FxEgW8bqbf2gVH4IWGjikUXJAW-A/_nc_ohc-Z_D_GuQNJB8Q7kNvwHmj_vl/live-dash/dash-abr5/1029238366572932.mpd?_nc_ad=z-m&_nc_cid=0&_nc_rml=0&_nc_zt=28&aaf=1&ccb=2-4&ms=m_CTPA&replica=1&sc_t=1&oh=00_AQG4iyuGHgoqTZZT7HFL0MEdubCHN42qBB9n1GozF9c0dQ&oe=6A7E8E89' },
+                    { name: 'سيرفر 3 - Yallakoora', url: 'https://jbvhgvggggggggggggggggvytcrrrrrrrrrrrrx6xtyyyyyyyyyyyyyyxdxt.yallakoora.org/ar_bsportz1/index.mpd' },
+                    { name: 'سيرفر 4 - Periscope 2', url: 'https://prod-fastly-eu-west-1.video.pscp.tv/Transcoding/v1/hls/nih6ejfrzBMZJIbcOKR54rNsVF_y3IB1lkyZx6AOUlVyfosSbtQLM9v2x5hBHPbEuq5HSupHidE8xb2zGaSFVw/non_transcode/eu-west-1/periscope-replay-direct-prod-eu-west-1-public/master_dynamic_delta.m3u8?type=live' },
+                    { name: 'سيرفر 5 - Periscope 1 (مكرر)', url: 'https://prod-fastly-eu-west-1.video.pscp.tv/Transcoding/v1/hls/bM6nWumwgu5L5J_TnGPhYZgCzPftZyp1QOWo3LBkU9UgQyqaA8GQ2udmbhGIkf9ivZ1WgeCaArB-_-Wtx4rsuw/non_transcode/eu-west-1/periscope-replay-direct-prod-eu-west-1-public/master_dynamic_delta.m3u8?type=live' },
+                    { name: 'سيرفر 6 - Token', url: 'http://next.allmycss.online:8080/assets/res2/java2/1313.css?x=/hls/&token=bDFDME9YU2hKemJqNDZv' }
+                ],
+                MAX_RETRIES_PER_SERVER: 1, // محاولة واحدة لكل سيرفر ثم الانتقال للتالي
+                TELEGRAM_DELAY_MS: 60_000,
+                CONTROLS_HIDE_DELAY: 3500,
+                EXPAND_MODES: ['contain', 'cover', 'fill'],
+                LIVE_THRESHOLD_SEC: 15
+            };
 
-    <div class="card">
-        <div class="question-header">
-            <div class="q-number">2</div>
-            <div>اذا كانت <span class="math">a(2, 3), b(w, -3)</span> فجد قيمة <span class="math">w</span> بحيث يكون ميل <span class="math">a&harr;b = <div class="frac"><span class="top">1</span><span class="bottom">2</span></div></span></div>
-        </div>
-        <div class="math-block">
-            <div class="math-line">ma&harr;b = <div class="frac"><span class="top">y&#8322; - y&#8321;</span><span class="bottom">x&#8322; - x&#8321;</span></div></div>
-            <div class="math-line"><div class="frac"><span class="top">1</span><span class="bottom">2</span></div> = <div class="frac"><span class="top">-3 - 3</span><span class="bottom">w - 2</span></div> &rarr; <div class="frac"><span class="top">1</span><span class="bottom">2</span></div> = <div class="frac"><span class="top">-3 - 3</span><span class="bottom">w - 2</span></div> &rarr; <div class="frac"><span class="top">1</span><span class="bottom">2</span></div> = <div class="frac"><span class="top">-6</span><span class="bottom">w - 2</span></div> &rarr; w - 2 = -12</div>
-            <div class="math-line">w = -12 + 2 &rarr; w = -10</div>
-        </div>
-    </div>
+            class VideoPlayer {
+                #player;
+                #video;
+                #controlsTimeout;
+                #expandIndex = 0;
+                #playbackAllowed = false;
+                #gesture = { active: false, type: null, startY: 0, startValue: 0 };
+                #currentServerIndex = 0;
 
-    <div class="card">
-        <div class="question-header">
-            <div class="q-number">1</div>
-            <div>جد معادلة المستقيم الذي ميله = <span class="math"><div class="frac"><span class="top">1</span><span class="bottom">2</span></div></span> ويمر بالنقطة <span class="math">(0, -4)</span></div>
-        </div>
-        <div class="solution-title">الحل:</div>
-        <div class="math-block">
-            <div class="math-line">y - y&#8321; = m(x - x&#8321;) &rarr; y + 4 = <div class="frac"><span class="top">1</span><span class="bottom">2</span></div>(x - 0)</div>
-            <div class="math-line">2(y + 4) = 1(x - 0) &rarr; 2y + 8 = x &rarr; x - 2y - 8 = 0</div>
-        </div>
+                constructor() {
+                    this.elements = {
+                        container: document.getElementById('player-container'),
+                        videoWrapper: document.getElementById('video-wrapper'),
+                        video: document.getElementById('video'),
+                        spinner: document.getElementById('loading-spinner'),
+                        errorOverlay: document.getElementById('error-overlay'),
+                        errorTitle: document.getElementById('error-title'),
+                        errorMessage: document.getElementById('error-message'),
+                        centerControls: document.getElementById('center-controls'),
+                        bottomControls: document.getElementById('bottom-controls-container'),
+                        playBtn: document.getElementById('play-pause-btn'),
+                        playCenterBtn: document.getElementById('play-pause-center-btn'),
+                        muteBtn: document.getElementById('mute-btn'),
+                        pipBtn: document.getElementById('pip-btn'),
+                        expandBtn: document.getElementById('expand-btn'),
+                        fullscreenBtn: document.getElementById('fullscreen-btn'),
+                        liveIndicator: document.getElementById('live-indicator'),
+                        progressPlayed: document.getElementById('progress-played'),
+                        progressScrubber: document.getElementById('progress-scrubber'),
+                        progressContainer: document.getElementById('progress-bar-container'),
+                        serverBtn: document.getElementById('server-btn'),
+                        qualityBtn: document.getElementById('quality-btn'),
+                        audioBtn: document.getElementById('audio-btn'),
+                        serverPopup: document.getElementById('server-popup'),
+                        qualityPopup: document.getElementById('quality-popup'),
+                        audioPopup: document.getElementById('audio-popup'),
+                        serverList: document.getElementById('server-list'),
+                        qualityList: document.getElementById('quality-list'),
+                        audioList: document.getElementById('audio-list'),
+                        telegramDialog: document.getElementById('telegram-dialog-overlay'),
+                        joinBtn: document.getElementById('join-telegram-btn'),
+                        alreadyBtn: document.getElementById('already-joined-btn'),
+                        brightnessHint: document.getElementById('brightness-hint'),
+                        brightnessVal: document.getElementById('brightness-value'),
+                        volumeHint: document.getElementById('volume-hint'),
+                        volumeVal: document.getElementById('volume-value'),
+                    };
+                    this.#video = this.elements.video;
+                    this.#video.crossOrigin = 'anonymous';
 
-        <hr style="border: 1px dashed #ccc; margin: 30px 0;">
+                    if (typeof shaka === 'undefined') {
+                        return this.#showError('خطأ', 'لم يتم تحميل Shaka Player.');
+                    }
 
-        <div class="question-header">
-            <div class="q-number">2</div>
-            <div>جد معادلة المستقيم الموازي لمحور السينات ويمر بالنقطة <span class="math">(2, -1)</span></div>
-        </div>
-        <div class="solution-title">الحل:</div>
-        <div style="font-weight: bold; margin-bottom: 10px;">ميل المستقيم الموازي لمحور السينات = 0</div>
-        <div class="math-block">
-            <div class="math-line">&there4; y - y&#8321; = m(x - x&#8321;) &rarr; y + 1 = 0(x - 2)</div>
-            <div class="math-line">&there4; y + 1 = 0</div>
-        </div>
+                    this.#player = new shaka.Player(this.#video);
+                    this.#player.configure({
+                        manifest: {
+                            dash: { ignoreMinBufferTime: true },
+                            hls: {
+                                useSafariBehaviorForLive: true,
+                                ignoreTextStreamFailures: true
+                            }
+                        },
+                        streaming: {
+                            rebufferingGoal: 2,
+                            bufferingGoal: 10,
+                            alwaysStreamText: true
+                        },
+                        abr: { defaultBandwidthEstimate: 3_000_000, enabled: true }
+                    });
 
-        <hr style="border: 1px dashed #ccc; margin: 30px 0;">
+                    this.#bindEvents();
+                    this.#init();
+                }
 
-        <div class="question-header">
-            <div class="q-number">3</div>
-            <div>جد معادلة المستقيم الموازي لمحور الصادات ويمر بالنقطة <span class="math">(2, -1)</span></div>
-        </div>
-        <div class="solution-title">الحل:</div>
-        <div style="font-weight: bold; margin-bottom: 10px;">لا يوجد ميل لأنه المستقيم يوازي محور الصادات</div>
-        <div style="font-weight: bold; text-align: center; margin-bottom: 10px;">معادلة المستقيم</div>
-        <div class="math-block" style="text-align: center;">
-            <div class="math-line">&there4; x = x&#8321; &rarr; x = 2 &rarr; x - 2 = 0</div>
-        </div>
-    </div>
+                async #init() {
+                    lucide.createIcons();
+                    this.#populateServers();
 
-    <div class="card">
-        <div class="question-header">
-            <div class="q-number">4</div>
-            <div>جد معادلة المستقيم المار بالنقطتين <span class="math">(-1, 3), (-1, 5)</span></div>
-        </div>
-        <div class="solution-title">الحل:</div>
-        <div style="font-weight: bold; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
-            <div class="math" style="margin: 0;">
-                <div class="frac"><span class="top">y - y&#8321;</span><span class="bottom">x - x&#8321;</span></div> = <div class="frac"><span class="top">y&#8322; - y&#8321;</span><span class="bottom">x&#8322; - x&#8321;</span></div>
-            </div>
-            <span>معادلة مستقيم مار بنقطتين</span>
-        </div>
-        <div class="math-block">
-            <div class="math-line">
-                <div class="frac"><span class="top">y - 5</span><span class="bottom">x - (-1)</span></div> = <div class="frac"><span class="top">3 - 5</span><span class="bottom">-1 + 1</span></div> &rarr; <div class="frac"><span class="top">y - 5</span><span class="bottom">x + 1</span></div> &rarr; <div class="frac"><span class="top">y - 5</span><span class="bottom">x + 1</span></div> = <div class="frac"><span class="top">-2</span><span class="bottom">0</span></div>
-            </div>
-            <div class="math-line">&there4; x + 1 = 0</div>
-        </div>
-        <div style="font-weight: bold; display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
-            <span>كمية غير معرفة</span>
-            <div class="math"><div class="frac"><span class="top">-2</span><span class="bottom">0</span></div></div>
-            <span>وهذا غير ممكن لأنه</span>
-        </div>
-    </div>
+                    if (localStorage.getItem('telegramDialogDismissed') === 'true') {
+                        this.#playbackAllowed = true;
+                    } else {
+                        setTimeout(() => this.#openDialog(), CONFIG.TELEGRAM_DELAY_MS);
+                    }
 
-</div>
+                    // ابدأ بأول سيرفر
+                    await this.#loadServer(0);
+                }
 
+                async #loadServer(index) {
+                    if (index >= CONFIG.SERVERS.length) {
+                        this.#showError('فشل التحميل', 'جميع السيرفرات غير متاحة حالياً. حاول لاحقاً.');
+                        return;
+                    }
+
+                    this.#currentServerIndex = index;
+                    this.#showLoading(true);
+                    this.#hideError();
+                    this.#updateServerActive();
+
+                    try {
+                        await this.#player.load(CONFIG.SERVERS[index].url);
+                        this.#showLoading(false);
+                        this.#showControls();
+                        if (this.#playbackAllowed) {
+                            this.#video.muted = false;
+                            this.#video.play().catch(() => {});
+                        }
+                    } catch (err) {
+                        console.warn(`فشل السيرفر ${index + 1}:`, err);
+                        this.#showLoading(false);
+                        // الانتقال تلقائيًا للسيرفر التالي
+                        setTimeout(() => this.#loadServer(index + 1), 1000);
+                    }
+                }
+
+                #populateServers() {
+                    const list = this.elements.serverList;
+                    list.innerHTML = '';
+                    CONFIG.SERVERS.forEach((server, index) => {
+                        const li = document.createElement('li');
+                        li.className = `menu-item ${index === this.#currentServerIndex ? 'active' : ''}`;
+                        li.innerHTML = `${server.name} <span class="check-icon"><i data-lucide="check"></i></span>`;
+                        li.onclick = () => {
+                            this.#loadServer(index);
+                            this.#togglePopup(this.elements.serverBtn, this.elements.serverPopup);
+                        };
+                        list.appendChild(li);
+                    });
+                    lucide.createIcons();
+                }
+
+                #updateServerActive() {
+                    const items = this.elements.serverList.querySelectorAll('.menu-item');
+                    items.forEach((item, index) => {
+                        if (index === this.#currentServerIndex) {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                }
+
+                #showLoading(show) { this.elements.spinner.style.display = show ? 'flex' : 'none'; }
+                #showError(title, msg) {
+                    this.#showLoading(false);
+                    this.elements.errorTitle.textContent = title;
+                    this.elements.errorMessage.textContent = msg;
+                    this.elements.errorOverlay.style.display = 'flex';
+                    lucide.createIcons();
+                }
+                #hideError() { this.elements.errorOverlay.style.display = 'none'; }
+
+                #openDialog() { this.elements.telegramDialog.classList.add('visible'); }
+                #closeDialog() { this.elements.telegramDialog.classList.remove('visible'); }
+                #allowPlayback() {
+                    localStorage.setItem('telegramDialogDismissed', 'true');
+                    this.#playbackAllowed = true;
+                    this.#closeDialog();
+                    this.#video.muted = false;
+                    this.#video.play().catch(() => {});
+                }
+
+                #showControls() {
+                    this.elements.bottomControls.classList.add('visible');
+                    this.elements.centerControls.classList.add('visible');
+                    clearTimeout(this.#controlsTimeout);
+                    if (!this.#video.paused) {
+                        this.#controlsTimeout = setTimeout(() => this.#hideControls(), CONFIG.CONTROLS_HIDE_DELAY);
+                    }
+                }
+                #hideControls() {
+                    if (document.fullscreenElement && this.#video.paused) return;
+                    if (this.elements.telegramDialog.classList.contains('visible')) return;
+                    this.elements.bottomControls.classList.remove('visible');
+                    this.elements.centerControls.classList.remove('visible');
+                    this.#closePopups();
+                }
+                #closePopups() {
+                    this.elements.serverPopup.style.display = 'none';
+                    this.elements.qualityPopup.style.display = 'none';
+                    this.elements.audioPopup.style.display = 'none';
+                }
+
+                #togglePlay() {
+                    if (!this.#playbackAllowed) return this.#openDialog();
+                    if (this.#video.paused) this.#video.play();
+                    else this.#video.pause();
+                }
+                #updatePlayIcon() {
+                    const icon = this.#video.paused ? 'play' : 'pause';
+                    this.elements.playBtn.innerHTML = `<i data-lucide="${icon}"></i>`;
+                    this.elements.playCenterBtn.innerHTML = `<i data-lucide="${icon}"></i>`;
+                    lucide.createIcons();
+                }
+
+                async #toggleFullscreen() {
+                    if (!document.fullscreenElement) {
+                        await this.elements.container.requestFullscreen();
+                    } else {
+                        await document.exitFullscreen();
+                    }
+                }
+                #updateFullscreenIcon() {
+                    const icon = document.fullscreenElement ? 'minimize' : 'maximize';
+                    this.elements.fullscreenBtn.innerHTML = `<i data-lucide="${icon}"></i>`;
+                    lucide.createIcons();
+                }
+
+                #togglePopup(btn, popup, populator) {
+                    const isOpen = popup.style.display === 'block';
+                    this.#closePopups();
+                    if (isOpen) return;
+                    if (populator) populator.call(this);
+                    const contRect = this.elements.container.getBoundingClientRect();
+                    const btnRect = btn.getBoundingClientRect();
+                    const w = popup.offsetWidth || 200;
+                    let left = (btnRect.left - contRect.left) + (btnRect.width / 2) - (w / 2);
+                    left = Math.max(10, Math.min(left, contRect.width - w - 10));
+                    popup.style.left = `${left}px`;
+                    popup.style.display = 'block';
+                }
+
+                #populateQuality() {
+                    const list = this.elements.qualityList;
+                    list.innerHTML = '';
+                    const conf = this.#player.getConfiguration();
+                    const tracks = this.#player.getVariantTracks();
+                    const active = tracks.find(t => t.active);
+                    const auto = document.createElement('li');
+                    auto.className = `menu-item ${conf.abr.enabled ? 'active' : ''}`;
+                    auto.innerHTML = `تلقائي <span class="check-icon"><i data-lucide="check"></i></span>`;
+                    auto.onclick = () => {
+                        this.#player.configure('abr.enabled', true);
+                        this.#togglePopup(this.elements.qualityBtn, this.elements.qualityPopup);
+                    };
+                    list.appendChild(auto);
+                    [...new Set(tracks.map(t => t.height))].filter(Boolean).sort((a, b) => b - a).forEach(h => {
+                        const track = tracks.find(t => t.height === h);
+                        const li = document.createElement('li');
+                        const isActive = !conf.abr.enabled && active && active.height === h;
+                        li.className = `menu-item ${isActive ? 'active' : ''}`;
+                        li.innerHTML = `${h}p <span class="check-icon"><i data-lucide="check"></i></span>`;
+                        li.onclick = () => {
+                            this.#player.configure('abr.enabled', false);
+                            this.#player.selectVariantTrack(track, true);
+                            this.#togglePopup(this.elements.qualityBtn, this.elements.qualityPopup);
+                        };
+                        list.appendChild(li);
+                    });
+                    lucide.createIcons();
+                }
+                #populateAudio() {
+                    const list = this.elements.audioList;
+                    list.innerHTML = '';
+                    const tracks = this.#player.getAudioLanguagesAndRoles();
+                    const current = this.#player.getAudioLanguages()[0];
+                    tracks.forEach(t => {
+                        const li = document.createElement('li');
+                        const isActive = t.language === current;
+                        li.className = `menu-item ${isActive ? 'active' : ''}`;
+                        li.innerHTML = `${t.label || t.language} <span class="check-icon"><i data-lucide="check"></i></span>`;
+                        li.onclick = () => {
+                            this.#player.selectAudioLanguage(t.language, t.role);
+                            this.#togglePopup(this.elements.audioBtn, this.elements.audioPopup);
+                        };
+                        list.appendChild(li);
+                    });
+                    lucide.createIcons();
+                }
+
+                #updateProgress() {
+                    const range = this.#player.seekRange();
+                    if (!isFinite(range.end)) return;
+                    if (this.#player.isLive()) {
+                        const behind = this.#video.paused || (range.end - this.#video.currentTime) > CONFIG.LIVE_THRESHOLD_SEC;
+                        this.elements.liveIndicator.className = behind ? 'is-not-live' : 'is-live';
+                        this.elements.liveIndicator.innerHTML = behind ? '● متأخر' : '● مباشر';
+                        this.elements.liveIndicator.style.display = 'inline-block';
+                        this.elements.progressPlayed.style.width = '100%';
+                        this.elements.progressScrubber.style.left = '100%';
+                    } else if (range.end > 0) {
+                        const pct = ((this.#video.currentTime - range.start) / (range.end - range.start)) * 100;
+                        this.elements.progressPlayed.style.width = `${pct}%`;
+                        this.elements.progressScrubber.style.left = `${pct}%`;
+                        this.elements.liveIndicator.style.display = 'inline-block';
+                        this.elements.liveIndicator.className = '';
+                        this.elements.liveIndicator.style.backgroundColor = 'transparent';
+                        this.elements.liveIndicator.style.cursor = 'default';
+                        this.elements.liveIndicator.innerHTML =
+                            `${this.#formatTime(this.#video.currentTime)} / ${this.#formatTime(range.end)}`;
+                    } else {
+                        this.elements.liveIndicator.style.display = 'none';
+                    }
+                }
+                #formatTime(s) {
+                    if (isNaN(s) || s < 0) return '00:00';
+                    const d = new Date(s * 1000);
+                    return s >= 3600 ? d.toISOString().substr(11, 8) : d.toISOString().substr(14, 5);
+                }
+
+                #handleProgressTap(e) {
+                    if (this.#player.isLive()) return;
+                    const rect = this.elements.progressContainer.getBoundingClientRect();
+                    const range = this.#player.seekRange();
+                    const pct = (e.clientX - rect.left) / rect.width;
+                    this.#video.currentTime = range.start + pct * (range.end - range.start);
+                }
+
+                #handleGestureStart(e) {
+                    if (e.touches.length !== 2) return;
+                    const touch = e.touches[0];
+                    const midX = this.elements.container.getBoundingClientRect().width / 2;
+                    this.#gesture.active = true;
+                    this.#gesture.startY = touch.clientY;
+                    this.#gesture.type = (touch.clientX < midX) ? 'brightness' : 'volume';
+                    if (this.#gesture.type === 'brightness') {
+                        const m = getComputedStyle(this.#video).filter.match(/brightness\(([\d.]+)\)/);
+                        this.#gesture.startValue = m ? parseFloat(m[1]) : 1;
+                    } else {
+                        this.#gesture.startValue = this.#video.volume;
+                    }
+                }
+                #handleGestureMove(e) {
+                    if (!this.#gesture.active || e.touches.length !== 2) return;
+                    const delta = this.#gesture.startY - e.touches[0].clientY;
+                    const change = delta / 300;
+                    if (this.#gesture.type === 'brightness') {
+                        let val = Math.min(3, Math.max(0.2, this.#gesture.startValue + change));
+                        this.#video.style.filter = `brightness(${val})`;
+                        this.elements.brightnessHint.style.opacity = '1';
+                        this.elements.brightnessVal.textContent = Math.round((val / 3) * 100) + '%';
+                    } else {
+                        let val = Math.min(1, Math.max(0, this.#gesture.startValue + change));
+                        this.#video.volume = val;
+                        this.elements.volumeHint.style.opacity = '1';
+                        this.elements.volumeVal.textContent = Math.round(val * 100) + '%';
+                    }
+                }
+                #handleGestureEnd() {
+                    if (!this.#gesture.active) return;
+                    this.#gesture.active = false;
+                    setTimeout(() => {
+                        this.elements.brightnessHint.style.opacity = '0';
+                        this.elements.volumeHint.style.opacity = '0';
+                    }, 800);
+                }
+
+                #bindEvents() {
+                    const el = this.elements;
+                    this.#player.addEventListener('error', (e) => {
+                        const err = e.detail;
+                        console.error('Shaka Error:', err);
+                        // الانتقال للسيرفر التالي تلقائيًا
+                        this.#loadServer(this.#currentServerIndex + 1);
+                    });
+                    this.#player.addEventListener('trackschanged', () => {
+                        this.#populateQuality();
+                        this.#populateAudio();
+                    });
+                    this.#player.addEventListener('buffering', (e) => this.#showLoading(e.buffering));
+                    this.#video.addEventListener('play', () => { this.#updatePlayIcon();
+                        this.#showControls(); });
+                    this.#video.addEventListener('pause', () => { this.#updatePlayIcon();
+                        this.#showControls(); });
+                    this.#video.addEventListener('volumechange', () => {
+                        const icon = (this.#video.muted || this.#video.volume === 0) ? 'volume-x' : 'volume-2';
+                        el.muteBtn.innerHTML = `<i data-lucide="${icon}"></i>`;
+                        lucide.createIcons();
+                    });
+                    this.#video.addEventListener('timeupdate', () => this.#updateProgress());
+                    el.videoWrapper.addEventListener('click', (e) => {
+                        if (e.target !== el.videoWrapper) return;
+                        el.bottomControls.classList.contains('visible') ? this.#hideControls() : this
+                            .#showControls();
+                    });
+                    el.videoWrapper.addEventListener('dblclick', async (e) => {
+                        if (e.target !== el.videoWrapper) return;
+                        await this.#toggleFullscreen();
+                    });
+                    el.container.addEventListener('mousemove', () => this.#showControls());
+                    el.container.addEventListener('touchstart', (e) => this.#handleGestureStart(e), { passive: false });
+                    el.container.addEventListener('touchmove', (e) => this.#handleGestureMove(e), { passive: false });
+                    el.container.addEventListener('touchend', () => this.#handleGestureEnd());
+                    el.playBtn.addEventListener('click', (e) => { e.stopPropagation();
+                        this.#togglePlay(); });
+                    el.playCenterBtn.addEventListener('click', (e) => { e.stopPropagation();
+                        this.#togglePlay(); });
+                    document.getElementById('seek-backward-center-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.#video.currentTime += 10;
+                    });
+                    document.getElementById('seek-forward-center-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.#video.currentTime -= 10;
+                    });
+                    el.muteBtn.addEventListener('click', (e) => { e.stopPropagation();
+                        this.#video.muted = !this.#video.muted; });
+                    el.serverBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.#togglePopup(el.serverBtn, el.serverPopup, this.#populateServers);
+                    });
+                    el.qualityBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.#togglePopup(el.qualityBtn, el.qualityPopup, this.#populateQuality);
+                    });
+                    el.audioBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.#togglePopup(el.audioBtn, el.audioPopup, this.#populateAudio);
+                    });
+                    el.pipBtn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        document.pictureInPictureElement ? await document.exitPictureInPicture() : await this.#video
+                            .requestPictureInPicture();
+                    });
+                    el.expandBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.#expandIndex = (this.#expandIndex + 1) % CONFIG.EXPAND_MODES.length;
+                        this.#video.style.objectFit = CONFIG.EXPAND_MODES[this.#expandIndex];
+                    });
+                    el.fullscreenBtn.addEventListener('click', (e) => { e.stopPropagation();
+                        this.#toggleFullscreen(); });
+                    document.addEventListener('fullscreenchange', () => this.#updateFullscreenIcon());
+                    el.liveIndicator.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (el.liveIndicator.classList.contains('is-not-live') && this.#player.isLive()) {
+                            this.#video.currentTime = this.#player.seekRange().end;
+                        }
+                    });
+                    el.progressContainer.addEventListener('click', (e) => this.#handleProgressTap(e));
+                    el.progressContainer.addEventListener('pointerdown', (e) => {
+                        if (this.#player.isLive()) return;
+                        const onMove = (ev) => {
+                            const rect = el.progressContainer.getBoundingClientRect();
+                            const range = this.#player.seekRange();
+                            const pct = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+                            this.#video.currentTime = range.start + pct * (range.end - range.start);
+                        };
+                        const onUp = () => {
+                            document.removeEventListener('pointermove', onMove);
+                            document.removeEventListener('pointerup', onUp);
+                        };
+                        document.addEventListener('pointermove', onMove);
+                        document.addEventListener('pointerup', onUp);
+                    });
+                    el.joinBtn.addEventListener('click', () => this.#allowPlayback());
+                    el.alreadyBtn.addEventListener('click', () => this.#allowPlayback());
+                }
+            }
+
+            // انتظر تحميل Shaka
+            if (typeof shaka === 'undefined') {
+                window.addEventListener('load', () => new VideoPlayer());
+            } else {
+                new VideoPlayer();
+            }
+        });
+    </script>
 </body>
 </html>
